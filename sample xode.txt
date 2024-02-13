@@ -1,0 +1,71 @@
+const express = require('express');
+const axios = require('axios');
+const Redis = require('ioredis');
+
+const app = express();
+const redisClient = new Redis();
+
+app.get('/fetchData', async (req, res) => {
+  try {
+    // Check if data is in Redis
+    const cachedData = await redisClient.get('cachedData');
+    
+    if (cachedData) {
+      // If data is in Redis, serve it
+      res.json(JSON.parse(cachedData));
+    } else {
+      // If not, fetch data from Sanity
+      const sanityResponse = await axios.get('https://api.sanity.io/v1/data/my-dataset/my-type');
+      
+      // Store data in Redis for future requests
+      await redisClient.set('cachedData', JSON.stringify(sanityResponse.data));
+      
+      // Serve the fetched data
+      res.json(sanityResponse.data);
+    }
+  } catch (error) {
+    console.error(error);
+    res.status(500).send('Internal Server Error');
+  }
+});
+
+const PORT = process.env.PORT || 3000;
+app.listen(PORT, () => {
+  console.log(Server running on port ${PORT});
+});
+
+shoptable {
+  _id,
+  shopName,
+  shopOwner,
+  description,
+  logo,
+  cover,
+  address,
+  latitude,
+  longitude,
+  isActive,
+  isVerified
+}
+dishtable {
+  _id,
+  shopId,
+  dishName,
+  description,
+  tag,
+  price,
+  image,
+  isAvailable
+}
+producttable {
+  _id,
+  shopId,
+  productName,
+  description,
+  tag,
+  price,
+  image,
+  isAvailable,
+}
+
+

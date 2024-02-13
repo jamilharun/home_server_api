@@ -1,0 +1,139 @@
+
+postgresql
+
+user: home_server
+pass: jamil
+db name: campusbytesdb_pg
+description:{
+    this database will use to gather datas, like. 
+        users (including: admins, clients, shopowners, schooladmn ),
+        orders,
+        verification,
+    this database will be managed by admins only.  
+}
+connection:{
+    webapp(data processing website) is connected to this db,
+    and can login directy using the db.
+    
+    mobapp(cb mobile) 
+}
+database schema:
+
+CREATE TABLE IF NOT EXISTS "user" (
+    userid VARCHAR(256) UNIQUE PRIMARY KEY, 
+    given_name VARCHAR(50), 
+    family_name VARCHAR(50), 
+    nickName VARCHAR(50), 
+    name VARCHAR(50), 
+    image BYTEA, 
+    email 
+        VARCHAR(255) 
+        CHECK (email ~* '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$'), 
+    password_hash VARCHAR(256), 
+    phoneNumber VARCHAR(20), 
+    roles VARCHAR(25), 
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS "group" (
+    groupId INT PRIMARY KEY,
+    itemId VARCHAR(255),
+    price INT,
+    quantity INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+
+CREATE TABLE IF NOT EXISTS "order" (
+    orderId SERIAL PRIMARY KEY,
+    userId VARCHAR(256) REFERENCES "user"(userId),
+    groupId INT REFERENCES "group"(groupId),
+    totalPrice INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ServiceTax INT DEFAULT 0,
+    totalamount INT DEFAULT 0,
+);
+
+ALTER TABLE "order"
+ADD COLUMN totalamount INT DEFAULT 0;  
+
+
+//this is shop verification. 
+validation{
+    user,
+
+}
+
+CREATE TABLE IF NOT EXISTS userUpdate_timeStamp (
+    userId VARCHAR(256) PRIMARY KEY,
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+CREATE OR REPLACE FUNCTION update_user_timestamp()
+RETURNS TRIGGER AS $$
+BEGIN
+    BEGIN
+        UPDATE userUpdate_timeStamp
+        SET updated_at = CURRENT_TIMESTAMP
+        WHERE userId = NEW.userId;
+    EXCEPTION
+        WHEN NO_DATA_FOUND THEN
+            INSERT INTO userUpdate_timeStamp (userId, updated_at)
+            VALUES (NEW.userId, CURRENT_TIMESTAMP);
+    END;
+    
+    RETURN NEW;
+END;
+$$ LANGUAGE plpgsql;
+
+//trigger
+CREATE TRIGGER user_update_trigger
+BEFORE UPDATE ON "user"
+FOR EACH ROW
+EXECUTE FUNCTION update_user_timestamp();
+
+sudo iptables -I INPUT  -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
+sudo iptables -A INPUT  -p tcp --dport 3000 -j ACCEPT
+sudo iptables -A FORWARD  -i enol -o wlp2s0 -j ACCEPT
+sudo iptables -A INPUT  -j DROP
+sudo iptables -A OUTPUT  -j ACCEPT
+
+
+
+
+//unused
+-- Grant USAGE permission on the public schema
+GRANT USAGE ON SCHEMA public TO homeserver;
+
+-- Grant SELECT, INSERT, UPDATE, DELETE permissions on the userUpdate_timeStamp table
+GRANT SELECT, INSERT, UPDATE, DELETE ON TABLE userUpdate_timeStamp TO your_username;
+
+-- Grant USAGE, SELECT, UPDATE permissions on the "user" table
+GRANT USAGE, SELECT, UPDATE ON TABLE "user" TO your_username;
+
+INSERT INTO "user" (
+    userId, 
+    given_name, 
+    family_name, 
+    nickName, 
+    name, 
+    image, 
+    email, 
+    password_hash, 
+    phoneNumber, 
+    roles, 
+    created_at, 
+    updated_at
+) VALUES (
+    '123',
+    'qqqqqqq',
+    'aaaaaa',
+    'zzzzz',
+    'qaz',
+    NULL,
+    'qaz@example.com',
+    'hashed_password',
+    '1234567890',
+    'user'
+);
