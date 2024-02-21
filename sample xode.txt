@@ -69,3 +69,40 @@ producttable {
 }
 
 
+shop {
+    _id,
+    shopName,
+    slug,
+    shopOwner,
+    description,
+    tags[]
+}
+dish {
+    _id,
+    dishName,
+    slug,
+    shop,
+    description,
+    category,
+    tags[],   
+    preparationTime,
+    price,
+}
+
+product {
+    _id,
+    productName,
+    slug ,
+    shop,
+    description,
+    category,
+    tags[],
+    price,
+}
+
+tag {
+    _id,
+    tagName,
+    slug,
+    description,
+}

@@ -1,0 +1,24 @@
+try hard data flow
+cus wala me flowchart
+
+scanrio:1
+openMobApp => login => skip => scenario:2
+
+senario:2 (homescreen)
+homescreen  =>  reactquery  =>  ifnodata    =>  axios   =>  home_server
+-show featured -will check                     -pass http
+--show datas:   -if theres data                 -requests
+---isFeatured   -in local cache
+---isPromoted
+
+scenario:3 (home_server)
+home_server  => expressjs  =>   redis   =>  ifnodata    =>  sanitydb
+-pass http      -process http   -check if 
+                                -data exist
+                                -in cache
+
+305e9b97-245e-4a17-b8c2-67f0a0883d18
+*[_id == "305e9b97-245e-4a17-b8c2-67f0a0883d18"]
+
+*[_type == 'dish' && shop._ref == '305e9b97-245e-4a17-b8c2-67f0a0883d18' 
+|| _type == 'product' && shop._ref == '305e9b97-245e-4a17-b8c2-67f0a0883d18']

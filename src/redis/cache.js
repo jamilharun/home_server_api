@@ -2,20 +2,85 @@
 const Redis = require('ioredis');
 const sanity = require('../lib/sanity');
 const groq  = require('./groqQueries');
+const { generateUID } = require('../utils/genUid');
 
 // Initialize Redis client
 const redisClient = new Redis();
 
-// passing data redis cache 
-async function addCache(key,value) {
-  value.forEach(async (data) => {
-    const keyValuePair = `${key}${data._id}`;
-    await redisClient.set(key, JSON.stringify(keyValuePair), 'EX', 3600);
-  });
-};
-async function updateCache(key, updatedData) {
+//===============
+//testing
+async function addCacheShop(values) {
+  console.log('Adding to Cache');
+  const properties = Object.keys(values);
   try {
-    const cacheKey = key;
+    await Promise.all(values.map(async (data) => {
+      const keyValuePair = `${data._type}:${data._id}`;
+            
+      await redisClient
+        .hmset(keyValuePair, 
+          '_id', data._id,
+          'shopName', data.shopName,
+          '_type', data._type,
+          'slug', data.slug,
+          'shopOwner', data.shopOwner,
+          'address', data.address,
+          'logo', data.logo,
+          'cover', data.cover,
+          'description', data.description,
+          'latitude', data.latitude,
+          'longitude', data.longitude,
+          'isActive', data.isActive,
+          'isFeatured', data.isFeatured,
+          'isPromoted', data.isPromoted,
+          '_createdAt', data._createdAt,
+          '_updatedAt', data._updatedAt,
+        );
+      console.log('Data added to Redis: Successful');
+    }));
+  } catch (error) {
+    console.error('Error adding data to Redis:', error);
+  }
+}
+
+
+
+// passing data redis cache 
+// async function addCache(values) {
+//   console.log('adding to Cache');
+//   try {
+//     // Corrected
+//     await Promise.all(values.map(async (data) => {
+//       const keyValuePair = `${data._type}:${data._id}`;
+//       await redisClient
+//         .set(keyValuePair, JSON.stringify(data), 'EX', 3600)
+//       console.log('Data added to Redis: successful');;
+//     })); // <-- Corrected
+//   } catch (error) {
+//     console.log('Error adding data to Redis:', error);
+//   }
+// };
+async function addCache(values) {
+  console.log('Adding to Cache');
+  try {
+    if (!Array.isArray(values)) {
+      console.log('Error: Values is not an array.');
+      return;
+    }
+
+    // Corrected
+    await Promise.all(values.map(async (data) => {
+      const keyValuePair = `${data._type}:${data._id}`;
+      await redisClient.set(keyValuePair, JSON.stringify(data), 'EX', 3600);
+    }));
+    console.log('Data added to Redis: Successful', values.length);
+  } catch (error) {
+    console.error('Error adding data to Redis:', error);
+  }
+}
+
+async function updateCache(updatedData) {
+  try {
+    const cacheKey = `${updatedData._type}:${updatedData._id}`;
     // Update the data in the cache
     await redisClient.set(cacheKey, JSON.stringify(updatedData), 'EX', 3600);
     return true;
@@ -30,9 +95,25 @@ async function updateCache(key, updatedData) {
 async function getKeysWithPattern(pattern) {
   try {
     const keys = await redisClient.keys(pattern);
-    if (keys) {
-      console.log('Data retrieved from Redis:', JSON.parse(keys));
-      return JSON.parse(keys);
+    if (keys && keys.length > 0) {
+      console.log('Keys retrieved from Redis:');
+      return keys;
+    } else {
+      console.log('No data retrieved from Redis');;
+      return null;
+    }
+  } catch (error) {
+    console.error('Error retrieving keys:', error);
+    throw error;
+  }
+};
+async function getValuesWithPattern(pattern) {
+  try {
+    const values = await redisClient.get(pattern);
+    
+    if (values) {
+      console.log('keys retrieved from Redis:');
+      return values;
     } else {
       console.log('No data retrieved from Redis');;
       return null;
@@ -47,11 +128,11 @@ async function getKeysWithPattern(pattern) {
 async function sanityFetch(query) {
   try {
     const data = await sanity.fetch(query);
-    if (!data) {
+    if (data.length == 0) {
       console.log('failed to fetch from Sanity.io:');
       return null;
     } else {
-      console.log('data retrieved from Sanity.io:', data);
+      console.log('data retrieved from Sanity.io:');
       return data;
     }
   } catch (error) {
@@ -61,6 +142,8 @@ async function sanityFetch(query) {
 };
 
 // async function sanityFetch(key,query,id) {}
+
+// this function will fetch data from redis based on the key
 async function getDataByKey(key) {
   try {
     const cachedData = await redisClient.get(key);
@@ -81,19 +164,19 @@ async function getDataByKey(key) {
 // to update shop data in the database,
 // we need to fetch the existing data first, 
 // then combine it with the updated data, and then update the data in Sanity.io
-async function updateData(id, updatedData) {
+async function updateData(updatedData) {
   try {
     // Fetch the existing data from Sanity.io
-    const existingData = await sanity.fetch(groq.fetchDataById(id));  
+    const existingData = await sanity.fetch(groq.fetchDataById(updatedData._id));  
     if (!existingData) {
-      throw new Error(`Shop with ID ${id} not found in Sanity.io`);
+      throw new Error(`Shop with ID ${updatedData._id} not found in Sanity.io`);
     }
     // Combine existing data with updated data
     const mergedData = { ...existingData, ...updatedData };
 
     // Update the data in Sanity.io
     const response = await sanity
-      .patch(id)
+      .patch(updatedData._id)
       .set(mergedData)
       .commit();
 
@@ -104,57 +187,9 @@ async function updateData(id, updatedData) {
   }
 }
 
-async function getShopDataWithDishAndProduct(shopId) {
-  try {
-    const shopKey = `shop:${shopId}`;
-    const shopData = await redisClient.hgetall(shopKey);
 
-    if (!shopData) {
-      return null; // Shop not found
-    }
-
-    // Fetch dish and product keys from the sets
-    const dishKeys = await redisClient.smembers(`${shopKey}:dishes`);
-    const productKeys = await redisClient.smembers(`${shopKey}:products`);
-
-    // Fetch dish and product data
-    const dishData = await Promise.all(dishKeys.map(key => redisClient.hgetall(key)));
-    const productData = await Promise.all(productKeys.map(key => redisClient.hgetall(key)));
-
-    return {
-      shop: shopData,
-      dishes: dishData,
-      products: productData,
-    };
-  } catch (error) {
-    console.error('Error fetching data:', error);
-    throw error;
-  }
-}
 //add data
-async function addShopDataWithDishAndProduct(key, shopData, id, item) {
-  try {
-    // Add data to Redis cache
-    await redisClient.hmset(key, shopData);
 
-    if (item._type === 'dish') {
-      const dishKey = `dish:${id}`;
-      await redisClient.sadd(`${shopKey}:dishes`, dishKey);
-    } else if (item._type === 'product') {
-      const productKey = `product:${id}`;
-      await redisClient.sadd(`${shopKey}:products`, productKey);
-    }
-
-    // You can also set an expiration time for the cache if needed
-    // await redisClient.expire(shopKey, 3600);
-
-    console.log('Data added to Redis cache successfully');
-    
-  } catch (error) {
-    console.error('Error adding data to Redis cache:', error);
-    throw error;
-  }
-};
 
 //may mali sa part na to.
 //future jamil check yung sanity fetch json format
@@ -166,7 +201,7 @@ async function addNewDataToSanity(shopId, id, item) {
     // Create a new document in Sanity.io
     const addedData = await sanity.create({
       _type: documentType,
-      _id: id, // You might want to customize the document ID based on your needs
+      _id: generateUID(), // You might want to customize the document ID based on your needs
       shopId: shopId,
       ...item, // Spread the item properties into the document
     });
@@ -178,7 +213,7 @@ async function addNewDataToSanity(shopId, id, item) {
   }
 }
 
-
+//delete data
 async function deleteData(id) {
   try {
     // Delete the data in Sanity.io using the appropriate method
@@ -206,6 +241,7 @@ async function deleteCache(key) {
 module.exports = {
   //fetch data
   getKeysWithPattern,
+  getValuesWithPattern,
   sanityFetch,
   getDataByKey,
   
@@ -213,6 +249,7 @@ module.exports = {
   
   //add data
   addCache,
+  addCacheShop,
   addShopDataWithDishAndProduct,
   addNewDataToSanity,
   

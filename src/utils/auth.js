@@ -2,7 +2,6 @@ const jwt = require('jsonwebtoken');
 
 require('dotenv').config();
 
-console.log(process.env.NODE_ENV_SECRET_KEY);
 // Secret key for signing and verifying tokens
 const secretKey = process.env.NODE_ENV_SECRET_KEY; // Replace with a strong, secret key
 

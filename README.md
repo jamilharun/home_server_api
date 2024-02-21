@@ -12,8 +12,9 @@ api archtecture:
 postgres {
     users,      --\
     orders,     ---==> expressjs
-    group,      --/
+    rating,     --/
     chat (ftf),
+    comments (ftf),
     validation (ftf)
     verification (ftf)
 }
@@ -22,6 +23,6 @@ sanity.io {
     shop,       --\
     products,   ---==> redis ==> expressjs
     dish,       --/
-    comments (ftf)
+    
 }
 

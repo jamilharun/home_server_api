@@ -6,38 +6,52 @@ const groq  = require('./groqQueries');
 
 router = Router() 
 
-// simple fetch
+//==============================================
+/* 
+  testing out redis HGET HGETALL 
+  kinda doenst work to my likings but i think it could work but
+  i guess im just too stupid to use it. maybe ill be able to make 
+  it workd in the future
 
-// this will initialize the fetching of data from redis or sanity
-// this code should be removed when querying a lot of data
-// its a double eedge sword
-router.get('/shop/dish', async (req, res) => {
-  try {
-    const keyPattern ='dish:*';
-    const cachedData = await cache.getKeysWithPattern(keyPattern);
-    if (!cachedData) {
-      const data = await cache.sanityFetch(groq.fetchAllDishes);
-      if (data) {
-        await cache.addCache('dish:', data);
-        res.json(data);
-      } else (res.status(500).json({ error: 'cant fetch data from sanity' }));
-    } else {res.json(cachedData);}
-  } catch (error) {res.status(500).json({ error: 'Internal server error' });}
-});
+  codes located in the trashcodes.js
+*/
 
+//==============================================
+//fetch
 router.get('/shop/', async (req, res) => {
   try {
     const keyPattern ='shop:*';
-    const cachedData = await cache.getKeysWithPattern(keyPattern);
-    // const allShops = await cache.getAllShops(); // Implement this function to fetch all shops
+    const cachedData = await cache.getValuesWithPattern(keyPattern);
     if (!cachedData) {
-      const data = await cache.sanityFetch(groq.fetchAllShops);
-      if (data) {
-        await cache.addCache('shop:', data);
-        res.json(data);
-      } else (res.status(500).json({ error: 'cant fetch data from sanity' }));
-    } else {res.json(cachedData);}
-  } catch (error) {res.status(500).json({ error: 'Internal server error' });}
+      const datas = await cache.sanityFetch(groq.fetchAllShops);
+      await cache.addCache(datas);
+      res.json(datas);
+    } else {
+      res.json(cachedData);
+    }
+  } catch (error) {
+    console.error('Error in /shop route:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+
+
+router.get('/shop/allAva', async (req, res) => {
+  try {
+    const keyPatterns = ['dish:*', 'product:*']
+    const cachedData = await Promise.all(keyPatterns.map(keyPattern => cache.getValuesWithPattern(keyPattern))); 
+    const isCacheEmpty = cachedData.some(data => data === null || data.length === 0);
+    if (isCacheEmpty) {
+      const datas = await cache.sanityFetch(groq.isAvaFeaPro);
+      await cache.addCache(datas);
+      res.json(datas);
+    } else {
+      res.json(cachedData);
+    }
+  } catch (error) {
+    console.error('Error in /shop/allAva route:', error);
+    res.status(500).json({ error: 'Internal server error' });
+  }
 });
 
 router.get('/shop/product', async (req,res) => {
@@ -47,12 +61,53 @@ router.get('/shop/product', async (req,res) => {
     if (!cachedData) {
       const data = await cache.sanityFetch(groq.fetchAllProducts);
       if (data) {
-        await cache.addCache('product:', data);
+        await Promise.all(datas.map(async (data) => {
+          const keyValuePair = `shop:${data._id}`;
+          await cache.updateCache(keyValuePair, data);
+        }));
         res.json(data);
       } else (res.status(500).json({ error: 'cant fetch data from sanity' }));
     } else {res.json(cachedData);}
   } catch (error) {res.status(500).json({ error: 'Internal server error' });}
-})
+});
+
+//this fill tags that are revenrece to a shop, dish, product.
+
+
+router.get('/shop/:dishId', async (req, res) => {
+  const { dishId } = req.params;
+  try {
+    const cacheData = await cache.getDataByKey(`dish:${dishId}`);
+    if (cacheData) {
+      res.json(cacheData);
+    } else {
+      const data = await cache.sanityFetch(groq.fetchDataById(dishId));
+      if (data) {
+        await cache.addCache('dish:', data);
+        res.json(data);
+      } else { res.status(500).json({ error: 'cant fetch data from sanity' });}
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+});
+router.get('/shop/product/:productId', async (req, res) => {
+  const { productId } = req.params;
+  try {
+    const cacheData = await cache.getDataByKey(`product:${productId}`);
+    if (cacheData) {
+      res.json(cacheData);
+    } else {
+      const data = await cache.sanityFetch(groq.fetchDataById(productId));
+      if (data) {
+        await cache.addCache('product:', data);
+        res.json(data);
+      } else { res.status(500).json({ error: 'cant fetch data from sanity' });}
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'Internal server error' });
+  }
+}),
 
 router.get('/shop/:shopId', async (req, res) => {
     const { shopId } = req.params;  
@@ -73,6 +128,8 @@ router.get('/shop/:shopId', async (req, res) => {
     }
 });
 
+
+// i forgot how to use this
 router.get('/keys/:keys', async (req, res) => {
   const { keysPattern } = req.params;
   const keys = cache.getKeysWithPattern('shop:*');
@@ -128,16 +185,16 @@ router.post('/shop/add', async (req, res) => {
 });
 // update data in cache and sanity data
 router.put('/shop/:shopId', async (req, res) => {
-  const { shopId } = req.params;
+  // const { shopId } = req.params;
   const updatedData = req.body;
   try {
     // Perform validation on updatedData if needed
 
     // Update the data in Sanity.io
-    const updatedShopData = await cache.updateData(shopId, updatedData);
+    const updatedShopData = await cache.updateData(updatedData);
     console.log('/shop/:shopId updatedShopData:', updatedShopData);
     // Update the data in the cache if necessary
-    await cache.updateCache(`shop:${shopId}`, updatedShopData);
+    await cache.updateCache(updatedShopData);
 
     const latestData = await cache.getDataByKey(`shop:${shopId}`);
 

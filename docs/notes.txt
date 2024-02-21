@@ -36,7 +36,7 @@ CREATE TABLE IF NOT EXISTS "user" (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
+//will remove
 CREATE TABLE IF NOT EXISTS "group" (
     groupId INT PRIMARY KEY,
     itemId VARCHAR(255),
@@ -48,8 +48,10 @@ CREATE TABLE IF NOT EXISTS "group" (
 
 CREATE TABLE IF NOT EXISTS "order" (
     orderId SERIAL PRIMARY KEY,
+    orderRef, VARCHAR(250)
     userId VARCHAR(256) REFERENCES "user"(userId),
-    groupId INT REFERENCES "group"(groupId),
+    group INT,
+    quantity INT,
     totalPrice INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ServiceTax INT DEFAULT 0,
@@ -92,6 +94,32 @@ CREATE TRIGGER user_update_trigger
 BEFORE UPDATE ON "user"
 FOR EACH ROW
 EXECUTE FUNCTION update_user_timestamp();
+
+
+// will still need to check
+CREATE IF NOT EXIST "rating" {
+    ratingid serial primary key,
+    reftoid VARCHAR(250),
+    refbyid VARCHAR(250) REFERENCES "user" userid,
+    rating INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+};
+CREATE IF NOT EXIST "comment" {
+    commentid serial primary key,
+    commentedtoid VARCHAR(250),
+    commentedbyid VARCHAR(250) REFERENCES "user"userId,
+    text VARCHAR(250),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+    updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+}
+CREATE IF NOT EXIST "chat" {
+    chatid serial primary key,
+    chatroom VARCHAR(250) UNIQUE,
+    text VARCHAR(250),
+    chatby VARCHAR(250),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
+}
 
 sudo iptables -I INPUT  -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT
 sudo iptables -A INPUT  -p tcp --dport 3000 -j ACCEPT

@@ -1,0 +1,155 @@
+shop {
+    _id,
+    shopName,
+    _type,
+    slug {
+        current,
+        _type,
+    },
+    shopOwner,
+    description,
+    logo {
+        _ref,
+        altText,
+        caption,
+        asset {
+            -ref,
+            _type:
+        },
+    },
+    _rev,
+    cover {
+        _ref,
+        altText,
+        caption,
+        asset {
+            -ref,
+            _type:
+        },
+    },
+    address,
+    latitude,
+    longitude,
+    isActive,
+    isFeatured,
+    isPromoted,
+    _createdAt,
+    _updatedAt
+}
+dish {
+    _id,
+    dishName,
+    _type,
+    slug {
+        current,
+        _type,
+    },
+    shop {
+        _ref,
+        _type,
+    },
+    description,
+    category {
+        _ref,
+        _type,
+    },
+    tags[]{
+        _ref,
+        _type,
+        _key
+    },,   
+    preparationTime,
+    price,
+    image {
+        _ref,
+        altText,
+        caption,
+        asset {
+            -ref,
+            _type:
+        },
+    },
+    _rev,
+    isAvailable,
+    isFeatured,
+    isPromoted,
+    _createdAt,
+    _updatedAt
+}
+
+product {
+    _id,
+    productName,
+    _type,
+    slug {
+        current,
+        _type,
+    },
+    shop{
+        _ref,
+        _type,
+    },
+    description,
+    category {
+        _ref,
+        _type,
+    },
+    tags[]{
+        _ref,
+        _type,
+        _key
+    },,
+    price,
+    image {
+        _ref,
+        altText,
+        caption,
+        asset {
+            -ref,
+            _type:
+        },
+    },
+    _rev,
+    isAvailable,
+    isFeatured,
+    isPromoted,
+    _createdAt,
+    _updatedAt
+}
+
+tag {
+    _id,
+    tagName,
+    slug {
+        current,
+        _type,
+    },
+    description,
+    _rev,
+    color,
+    _createdAt,
+    _updatedAt
+}
+
+// donna add to postgres
+rating {
+    rateId,
+    referenceId,
+    ratedById,  
+    rating(number),
+}
+comment {
+    commentId,
+    text,
+    referenceId (this is either shop, dish, product),
+    fromUserId,
+
+}
+category {
+    categoryId
+    categoryName,
+    slug,
+    description,
+    image,
+    isFeatured
+}
