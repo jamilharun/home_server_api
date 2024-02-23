@@ -19,6 +19,9 @@ app.use(express.json());
 app.use("/api/postgres", userRoutes);
 app.use("/api/sanity", redisRoutes);
 
+app.get('/', (req, res) => {
+  res.send('it wotks')
+})
 //this is supposed to notify my when there are updated data in sanitydb
 // SSE endpoint
 app.get('/sse', (req, res) => {

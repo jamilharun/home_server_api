@@ -21,14 +21,22 @@ router = Router()
 router.get('/shop/', async (req, res) => {
   try {
     const keyPattern ='shop:*';
-    const cachedData = await cache.getValuesWithPattern(keyPattern);
-    if (!cachedData) {
+    const cacheKeys = await cache.getKeysWithPattern(keyPattern);
+
+    if (!cacheKeys) {
       const datas = await cache.sanityFetch(groq.fetchAllShops);
       await cache.addCache(datas);
       res.json(datas);
-    } else {
-      res.json(cachedData);
-    }
+    } 
+
+    const cachedData = await cache.getValuesWithPattern(cacheKeys);
+    
+    if (!cachedData) {
+      res.status(500).json({ error: 'cant fetch data from cache' });
+    } 
+
+    res.json(cachedData);
+    
   } catch (error) {
     console.error('Error in /shop route:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -38,34 +46,45 @@ router.get('/shop/', async (req, res) => {
 
 router.get('/shop/allAva', async (req, res) => {
   try {
-    const keyPatterns = ['dish:*', 'product:*']
-    const cachedData = await Promise.all(keyPatterns.map(keyPattern => cache.getValuesWithPattern(keyPattern))); 
-    const isCacheEmpty = cachedData.some(data => data === null || data.length === 0);
-    if (isCacheEmpty) {
+    const keyPatterns = ['dish:*', 'product:*'];
+    const cachedKeys = await cache.getKeysWithPattern(keyPatterns);
+    // const cachedKeys = await Promise.all(keyPatterns.map(
+    //   keyPattern => cache.getKeysWithPattern(keyPattern))); 
+    const isCacheEmpty = cachedKeys?.map(data => data === null || data.length === 0);
+    // const isCacheEmpty = cachedKeys.every(data => data === null || data.length === 0);
+
+    console.log(isCacheEmpty);
+    if (!cachedKeys || cachedKeys == null || cachedKeys.length < 0) {
       const datas = await cache.sanityFetch(groq.isAvaFeaPro);
       await cache.addCache(datas);
       res.json(datas);
     } else {
+      const cachedData = await cache.getValuesWithPattern(cachedKeys);
+
+      if (!cachedData) {
+        res.status(500).json({ error: 'cant fetch data from cache' });
+      }
+  
       res.json(cachedData);
     }
+
   } catch (error) {
     console.error('Error in /shop/allAva route:', error);
     res.status(500).json({ error: 'Internal server error' });
   }
 });
 
+
+
 router.get('/shop/product', async (req,res) => {
   try {
-    const keyPattern ='product:*';
+    const keyPattern =['product:*'];
     const cachedData = await cache.getKeysWithPattern(keyPattern);
     if (!cachedData) {
-      const data = await cache.sanityFetch(groq.fetchAllProducts);
-      if (data) {
-        await Promise.all(datas.map(async (data) => {
-          const keyValuePair = `shop:${data._id}`;
-          await cache.updateCache(keyValuePair, data);
-        }));
-        res.json(data);
+      const datas = await cache.sanityFetch(groq.fetchAllProducts);
+      if (datas) {
+        await cache.addCache(datas);
+        res.json(datas);
       } else (res.status(500).json({ error: 'cant fetch data from sanity' }));
     } else {res.json(cachedData);}
   } catch (error) {res.status(500).json({ error: 'Internal server error' });}

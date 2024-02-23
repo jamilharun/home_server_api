@@ -127,6 +127,8 @@ sudo iptables -A FORWARD  -i enol -o wlp2s0 -j ACCEPT
 sudo iptables -A INPUT  -j DROP
 sudo iptables -A OUTPUT  -j ACCEPT
 
+sudo iptables -A INPUT -i lo -j ACCEPT
+sudo iptables -A INPUT -j LOG --log-prefix "Dropped: "
 
 
 

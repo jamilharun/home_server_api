@@ -221,3 +221,37 @@ async function addShopDataWithDishAndProduct(key, shopData, id, item) {
   }
 };
 
+async function addCacheShop(values) {
+  console.log('Adding to Cache');
+  const properties = Object.keys(values);
+  try {
+    await Promise.all(values.map(async (data) => {
+      const keyValuePair = `${data._type}:${data._id}`;
+            
+      await redisClient
+        .hmset(keyValuePair, 
+          '_id', data._id,
+          'shopName', data.shopName,
+          '_type', data._type,
+          'slug', data.slug,
+          'shopOwner', data.shopOwner,
+          'address', data.address,
+          'logo', data.logo,
+          'cover', data.cover,
+          'description', data.description,
+          'latitude', data.latitude,
+          'longitude', data.longitude,
+          'isActive', data.isActive,
+          'isFeatured', data.isFeatured,
+          'isPromoted', data.isPromoted,
+          '_createdAt', data._createdAt,
+          '_updatedAt', data._updatedAt,
+        );
+      console.log('Data added to Redis: Successful');
+    }));
+  } catch (error) {
+    console.error('Error adding data to Redis:', error);
+  }
+}
+
+

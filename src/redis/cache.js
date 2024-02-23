@@ -1,48 +1,13 @@
 //cache.js
-const Redis = require('ioredis');
+// const Redis = require('ioredis');
 const sanity = require('../lib/sanity');
+const redisClient = require('../lib/redis');
 const groq  = require('./groqQueries');
 const { generateUID } = require('../utils/genUid');
 
-// Initialize Redis client
-const redisClient = new Redis();
 
 //===============
 //testing
-async function addCacheShop(values) {
-  console.log('Adding to Cache');
-  const properties = Object.keys(values);
-  try {
-    await Promise.all(values.map(async (data) => {
-      const keyValuePair = `${data._type}:${data._id}`;
-            
-      await redisClient
-        .hmset(keyValuePair, 
-          '_id', data._id,
-          'shopName', data.shopName,
-          '_type', data._type,
-          'slug', data.slug,
-          'shopOwner', data.shopOwner,
-          'address', data.address,
-          'logo', data.logo,
-          'cover', data.cover,
-          'description', data.description,
-          'latitude', data.latitude,
-          'longitude', data.longitude,
-          'isActive', data.isActive,
-          'isFeatured', data.isFeatured,
-          'isPromoted', data.isPromoted,
-          '_createdAt', data._createdAt,
-          '_updatedAt', data._updatedAt,
-        );
-      console.log('Data added to Redis: Successful');
-    }));
-  } catch (error) {
-    console.error('Error adding data to Redis:', error);
-  }
-}
-
-
 
 // passing data redis cache 
 // async function addCache(values) {
@@ -60,7 +25,6 @@ async function addCacheShop(values) {
 //   }
 // };
 async function addCache(values) {
-  console.log('Adding to Cache');
   try {
     if (!Array.isArray(values)) {
       console.log('Error: Values is not an array.');
@@ -70,7 +34,7 @@ async function addCache(values) {
     // Corrected
     await Promise.all(values.map(async (data) => {
       const keyValuePair = `${data._type}:${data._id}`;
-      await redisClient.set(keyValuePair, JSON.stringify(data), 'EX', 3600);
+      await redisClient.set(keyValuePair, JSON.stringify(data), 'EX', 14400);
     }));
     console.log('Data added to Redis: Successful', values.length);
   } catch (error) {
@@ -94,9 +58,11 @@ async function updateCache(updatedData) {
 // fetiching existing data from redis
 async function getKeysWithPattern(pattern) {
   try {
-    const keys = await redisClient.keys(pattern);
+    const keys = Promise.all(pattern?.map(async (key) => {
+      return await redisClient.keys(key);
+    }));
     if (keys && keys.length > 0) {
-      console.log('Keys retrieved from Redis:');
+      console.log('Keys retrieved from Redis:', keys.length);
       return keys;
     } else {
       console.log('No data retrieved from Redis');;
@@ -107,15 +73,21 @@ async function getKeysWithPattern(pattern) {
     throw error;
   }
 };
+
 async function getValuesWithPattern(pattern) {
   try {
-    const values = await redisClient.get(pattern);
-    
+    const values = await Promise.all(pattern?.map(async (key) => {
+      return await redisClient.get(key);
+    }));
+
     if (values) {
-      console.log('keys retrieved from Redis:');
-      return values;
+      const json = await Promise.all(values.map(async (value) => {
+        return JSON.parse(value);
+      }));
+      console.log('keys retrieved from Redis:', json.length);
+      return json;
     } else {
-      console.log('No data retrieved from Redis');;
+      console.log('No data retrieved from Redis' );;
       return null;
     }
   } catch (error) {
@@ -244,13 +216,9 @@ module.exports = {
   getValuesWithPattern,
   sanityFetch,
   getDataByKey,
-  
-  getShopDataWithDishAndProduct,
-  
+    
   //add data
   addCache,
-  addCacheShop,
-  addShopDataWithDishAndProduct,
   addNewDataToSanity,
   
   //updata data
