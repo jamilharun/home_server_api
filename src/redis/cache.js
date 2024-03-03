@@ -24,24 +24,65 @@ const { generateUID } = require('../utils/genUid');
 //     console.log('Error adding data to Redis:', error);
 //   }
 // };
-async function addCache(values) {
+async function fetchCacheScores() {
   try {
+    const result = await redisClient.zRangeWithScores('shops', 0, -1);
+  
+    const shops = await Promise.all(result.map(async (data) => {
+      return redisClient.json.get(data.score);
+    }))
+    return shops;
+  } catch (error) { 
+    return null;
+  }
+}
+
+// add data to redis cache
+async function addCachedScores(values) {
+  try {
+    // error handler
     if (!Array.isArray(values)) {
       console.log('Error: Values is not an array.');
       return;
     }
 
-    // Corrected
+    // Add the data to the cache Scores
     await Promise.all(values.map(async (data) => {
-      const keyValuePair = `${data._type}:${data._id}`;
-      await redisClient.set(keyValuePair, JSON.stringify(data), 'EX', 14400);
+      await redisClient.zAdd('shops', {
+        value: data.shopName, 
+        score: `${data._type}:${data._id}`
+      },{ NX: true });
     }));
+
+    // Add the data to the cache set
+    await Promise.all(values.map(async (data) => {
+      await redisClient.json.set(`${data._type}:${data._id}`, data);
+    }))
+    
     console.log('Data added to Redis: Successful', values.length);
   } catch (error) {
     console.error('Error adding data to Redis:', error);
   }
 }
 
+async function cacheGetYourShop(shopId) {
+  try {
+    const result = await redisClient.json.get(`shop:${shopId}`);
+    if (!result) {
+      const fetch = await sanityFetch(groq.qfs1df(shopId))
+      if (!fetch) {
+        console.log('Error: No data found');
+      }
+      return fetch;
+    }
+    return result;
+  } catch (error) {
+    console.log('Error fetching data:', error);
+    return null;
+  }
+}
+
+//update
 async function updateCache(updatedData) {
   try {
     const cacheKey = `${updatedData._type}:${updatedData._id}`;
@@ -147,12 +188,12 @@ async function updateData(updatedData) {
     const mergedData = { ...existingData, ...updatedData };
 
     // Update the data in Sanity.io
-    const response = await sanity
+    await sanity
       .patch(updatedData._id)
       .set(mergedData)
       .commit();
 
-    return response;
+    return mergedData;
   } catch (error) {
     console.error('Error updating shop data in Sanity.io:', error);
     throw error;
@@ -189,9 +230,9 @@ async function addNewDataToSanity(shopId, id, item) {
 async function deleteData(id) {
   try {
     // Delete the data in Sanity.io using the appropriate method
-    const response = await sanity.delete(shopId);
+    const response = await sanity.delete(id);
 
-    return response;
+    console.log(response);
   } catch (error) {
     console.error('Error deleting shop data in Sanity.io:', error);
     throw error;
@@ -212,6 +253,11 @@ async function deleteCache(key) {
 
 module.exports = {
   //fetch data
+  cacheGetYourShop,
+
+  fetchCacheScores,
+  addCachedScores,
+
   getKeysWithPattern,
   getValuesWithPattern,
   sanityFetch,

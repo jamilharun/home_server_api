@@ -3,21 +3,21 @@
 //warning!
 //should only fetch 5 data
 //this should have restiction on the type of data being fetched
-const fetchAllShops = '*[_type == "shop" && isActive && !(_id in path("drafts.**"))]';
+// const fetchAllShops = '*[_type == "shop" && isActive && !(_id in path("drafts.**"))]';
 
-const fetchAllDishes = '*[_type == "dish" && isAvailable&& !(_id in path("drafts.**"))]';
+// const fetchAllDishes = '*[_type == "dish" && isAvailable&& !(_id in path("drafts.**"))]';
 
-const fetchAllProducts = '*[_type == "product" && isAvailable&& !(_id in path("drafts.**"))]';
+// const fetchAllProducts = '*[_type == "product" && isAvailable&& !(_id in path("drafts.**"))]';
 
-const fetchTags = '*[_id in $allTagIds];';
+// const fetchTags = '*[_id in $allTagIds];';
 
-const isAvaFeaPro = '*[isAvailable]';
+// const isAvaFeaPro = '*[isAvailable]';
 
-function fetchDataByShopIdAndAllAssets(shopId) {
-    const query = `*[_id == '${shopId}'
-    || shop._ref == '${shopId}']`
-    return query;
-}
+// function fetchDataByShopIdAndAllAssets(shopId) {
+//     const query = `*[_id == '${shopId}'
+//     || shop._ref == '${shopId}']`
+//     return query;
+// }
 
 
 function fetchDataById(id) {
@@ -25,13 +25,130 @@ function fetchDataById(id) {
     return data;
 }
 
+function qfs1df(id) {
+    const query = `*[_type == "shop" && shopOwner == ${id} &&!(_id in path("drafts.**"))] {
+        _type,
+        _id,
+        isPromoted,
+        description,
+        isActive,
+        logo,
+        slug,
+        shopOwner,
+        cover,
+        isFeatured,
+        longitude,
+        latitude,
+        shopName,
+        tags[]->{
+          _id,
+          tagName,
+          color,
+        },
+    
+        "products": *[_type == 'product' && !(_id in path("drafts.**")) && shop._ref == ^._id] {
+          _id,
+          productName,
+          slug,
+          tags[]->{
+            _id,
+            tagName,
+            color,
+          },
+          image,
+          Price,
+          description,
+          isFeatured,
+          isAvailable,
+          isPromoted,
+          _type,
+        },
+    
+        "dishes": *[_type == "dish" && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
+          _id,
+          dishName,
+          _type,
+          description,
+          price,
+          image,
+          preparationTime,
+          tags[]->{
+            _id,
+            tagName,
+            color,
+          },
+          isPromoted,
+          isFeatured,
+          isAvailable,
+        },
+      }`;
+      return query;
+}
+
+const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
+    _type,
+    _id,
+    isPromoted,
+    description,
+    isActive,
+    logo,
+    slug,
+    shopOwner,
+    cover,
+    isFeatured,
+    longitude,
+    latitude,
+    shopName,
+    tags[]->{
+      _id,
+      tagName,
+      color
+    },
+    "products": *[_type == 'product' && isAvailable && !(_id in path("drafts.**")) && shop._ref == ^._id] {
+      _id,
+      productName,
+      slug,
+      tags[]->{
+        _id,
+        tagName,
+        color
+      },
+      image,
+      Price,
+      description,
+      isFeatured,
+      isAvailable,
+      isPromoted,
+      _type,
+    },
+    "dishes": *[_type == "dish" && isAvailable && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
+      isPromoted,
+      dishName,
+      isFeatured,
+      isAvailable,
+      preparationTime,
+      _id,
+      description,
+      _type,
+      price,
+      image,
+      tags[]->{
+        _id,
+        tagName,
+        color,
+      },
+    },
+  }`;
 
 module.exports = {
-    fetchAllShops,
-    fetchAllDishes,
-    fetchAllProducts,
-    fetchTags,
-    isAvaFeaPro,
+    // fetchAllShops,
+    // fetchAllDishes,
+    // fetchAllProducts,
+    // fetchTags,
+    // isAvaFeaPro,
     fetchDataById,
-    fetchDataByShopIdAndAllAssets
+    // fetchDataByShopIdAndAllAssets
+    
+    qfs1df,
+    qfsdf
 }
