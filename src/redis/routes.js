@@ -56,15 +56,14 @@ router.get('/shop/', async (req, res) => {
 //id == shop owner id
 // use cases when the shop owner is checkedout his shop
 router.get('/shop/:id', async (req, res) => {
-  const { id } = req.params;
-
-  console.log('id: ', id);
+  const { _id } = req.params.id;
+  console.log('id: ', _id);;
   try {
     //fetching sorted sets from redis
-    const shop = await cache.cacheGetYourShop(id);
+    const shop = await cache.cacheGetYourShop(_id);
 
     if (!shop) {
-      const data = await cache.sanityFetch(groq.qfs1df(id));
+      const data = await cache.sanityFetch(groq.qfs1df(_id));
 
       if (data) {
         await cache.addCachedScores(data);
@@ -81,15 +80,15 @@ router.get('/shop/:id', async (req, res) => {
   }
 });
 
-
+//insert new data
 router.post('/shop/addNewData', async (req, res) => {
   const { newData } = req.body;
   console.log('newData: ', newData);
   try {
-    //fetching sorted sets from redis
-    const shop = await cache.addNewData(newData);
-    console.log('shop: ', shop);
-    
+    //insert data to sanity
+    const result = await cache.addNewData(newData);
+    console.log('result: ', result);
+
     const latestData = await cache.sanityFetch(groq.qfs1df(newData.shop._id));
     if (!latestData) return res.status(500).json({ error: 'Failed to fetch data from Sanity' })
       
@@ -105,22 +104,23 @@ router.post('/shop/addNewData', async (req, res) => {
 // how can i update data in json and in cached data?
 // update data in cache and sanity data
 router.put('/shop/updatedata', async (req, res) => {
-  const {shopId, updatedData} = req.body;
-  console.log("shopId: ", shopId, "\nupdatedData: ", updatedData);
+  const {updatedData} = req.body;
+  console.log("updatedData: ", updatedData);
   try {
     // Update the data in Sanity.io
     await cache.updateData(updatedData);
     // upon success
     // fetch latest data
-    const latestData = await cache.sanityFetch(groq.qfs1df(shopId));
+    const latestData = await cache.sanityFetch(groq.qfs1df(updatedData.shop._id));
 
     // if data is empty, return error
-    if (!latestData) res.status(500).json({ error: 'Failed to fetch data from Sanity' })
-
+    if (!latestData) {
+      res.status(500).json({ error: 'Failed to fetch data from Sanity' })
+    } else {
+      await cache.updateCache(latestData);
+      res.json(latestData);
+    }
     // Update the data in the cache if necessary
-    await cache.updateCache(latestData);
-
-    res.json(latestData);
   } catch (error) {
     console.error('Error updating shop data:', error);
     res.status(500).json({ error: 'Internal server error' });
@@ -129,17 +129,19 @@ router.put('/shop/updatedata', async (req, res) => {
 
 
 // to delete data in cache and sanity data
-router.delete('/shop/:delData', async (req, res) => {
-  const { itemId, shopId } = req.params;
+router.delete('/shop/deleteData', async (req, res) => {
+  const {data} = req.body;
   try {
     // Delete the data in Sanity.io
-    await cache.deleteData(itemId);
+    //data._id should associate to dish/product id
+    await cache.deleteData(data._id);
 
-    const refetch = await cache.cacheGetYourShop(shopId);
-
-    // await cache.deleteCache(`:${shopId}`);
-
-    res.json({ refetch });
+    const refetch = await cache.cacheGetYourShop(data.shop._id);
+    if (!refetch) {
+      res.json({ error: 'No data found' });
+    } else {
+      res.json({ refetch });
+    }
   } catch (error) {
     console.error('Error deleting shop data:', error);
     res.status(500).json({ error: 'Internal server error' });

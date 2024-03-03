@@ -9,7 +9,7 @@ const userRoutes = require('./src/user/routes');
 // const { generatedUID} = require('./genUid')
 
 const app = express();
-const port = 3000;
+const port = 80;
 const hostname = '127.0.0.1'; //example hostname 
 
 app.use(bodyParser.json());
