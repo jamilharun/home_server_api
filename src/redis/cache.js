@@ -274,8 +274,8 @@ module.exports = {
     
   //add data
   addNewData,
-  addCache,
-  addNewDataToSanity,
+  // addCache,
+  // addNewDataToSanity,
   
   //updata data
   updateData,
