@@ -39,14 +39,26 @@ CREATE TABLE IF NOT EXISTS "user" (
 
 CREATE TABLE IF NOT EXISTS "order" (
     orderId SERIAL PRIMARY KEY,
-    orderRef, VARCHAR(250)
-    userId VARCHAR(256) REFERENCES "user"(userId),
+    orderRef VARCHAR(250),
+    userId VARCHAR(256) REFERENCES "user"(userid),
     group INT,
     quantity INT,
     totalPrice INT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     ServiceTax INT DEFAULT 0,
     totalamount INT DEFAULT 0,
+);
+
+CREATE TABLE IF NOT EXISTS "order" (
+    orderId SERIAL PRIMARY KEY,
+    orderRef VARCHAR(250),
+    userId VARCHAR(256) REFERENCES "user"(userid),
+    groupNum INT,
+    quantity INT,
+    totalPrice INT,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    ServiceTax INT DEFAULT 0,
+    totalamount INT DEFAULT 0
 );
 
 ALTER TABLE "order"

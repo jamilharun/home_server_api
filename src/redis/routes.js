@@ -19,20 +19,20 @@ router = Router()
 //==============================================
 //fetch
 router.get('/shop/', async (req, res) => {
+  const keypattern = ['shop:*'];
   try {
     //fetching sorted sets from redis
     //if successful, return data
-    const allShops = await cache.fetchCacheScores()
+    const ask = await cache.getKeysWithPattern(keypattern)
 
-    if (!allShops) {
+    if (!ask) {
       //fetching scored is empty, probably its empty
       // gonna fetch data
-      const datas = await cache.sanityFetch(groq.qfsdf);
       
+      const datas = await cache.sanityFetch(groq.qfsdf)
       if (datas) {
         //fetching data successful
-        await cache.addCachedScores(datas);
-
+        
         res.json(datas);
       } else {
         //fetching data failed
@@ -41,7 +41,12 @@ router.get('/shop/', async (req, res) => {
       
     } else {
       //fetching score successful
-      res.json(allShops);
+      const asv = await cache.getValuesWithPattern(ask)
+      if (!asv) {
+        console.log('error: no shop value fetched');;
+        return null
+      }
+      res.json(asv);
     }
   } catch (error) {
     res.status(500).json({ error: 'fetch shops Internal server error' });

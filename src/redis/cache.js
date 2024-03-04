@@ -47,12 +47,12 @@ async function addCachedScores(values) {
     }
 
     // Add the data to the cache Scores
-    await Promise.all(values.map(async (data) => {
-      await redisClient.zAdd('shops', {
-        value: data.shopName, 
-        score: `${data._type}:${data._id}`
-      },{ NX: true });
-    }));
+    // await Promise.all(values.map(async (data) => {
+    //   await redisClient.zAdd('shops', {
+    //     value: data.shopName, 
+    //     score: `${data._type}:${data._id}`
+    //   },{ NX: true });
+    // }));
 
     // Add the data to the cache set
     await Promise.all(values.map(async (data) => {
