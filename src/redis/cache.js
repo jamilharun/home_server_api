@@ -10,20 +10,22 @@ const { generateUID } = require('../utils/genUid');
 //testing
 
 // passing data redis cache 
-// async function addCache(values) {
-//   console.log('adding to Cache');
-//   try {
-//     // Corrected
-//     await Promise.all(values.map(async (data) => {
-//       const keyValuePair = `${data._type}:${data._id}`;
-//       await redisClient
-//         .set(keyValuePair, JSON.stringify(data), 'EX', 3600)
-//       console.log('Data added to Redis: successful');;
-//     })); // <-- Corrected
-//   } catch (error) {
-//     console.log('Error adding data to Redis:', error);
-//   }
-// };
+async function addCache(values) {
+  console.log('adding to Cache');
+  try {
+    // Corrected
+    await Promise.all(values.map(async (data) => {
+      const keyValuePair = `${data._type}:${data._id}`;
+      await redisClient
+        .set(keyValuePair, JSON.stringify(data), 'EX', 3600)
+      console.log('Data added to Redis: successful');;
+    })); // <-- Corrected
+  } catch (error) {
+    console.log('Error adding data to Redis:', error);
+  }
+};
+
+
 async function fetchCacheScores() {
   try {
     const result = await redisClient.zRangeWithScores('shops', 0, -1);
@@ -274,7 +276,7 @@ module.exports = {
     
   //add data
   addNewData,
-  // addCache,
+  addCache,
   // addNewDataToSanity,
   
   //updata data

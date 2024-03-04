@@ -32,7 +32,7 @@ router.get('/shop/', async (req, res) => {
       const datas = await cache.sanityFetch(groq.qfsdf)
       if (datas) {
         //fetching data successful
-        
+        await cache.addCache(datas);
         res.json(datas);
       } else {
         //fetching data failed
