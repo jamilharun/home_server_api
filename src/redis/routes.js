@@ -21,6 +21,7 @@ router = Router()
 router.get('/shop/', async (req, res) => {
   try {
     //fetching sorted sets from redis
+    //if successful, return data
     const allShops = await cache.fetchCacheScores()
 
     if (!allShops) {
@@ -48,8 +49,11 @@ router.get('/shop/', async (req, res) => {
 });
 
 //id == shop owner id
+// use cases when the shop owner is checkedout his shop
 router.get('/shop/:id', async (req, res) => {
   const { id } = req.params;
+
+  console.log('id: ', id);
   try {
     //fetching sorted sets from redis
     const shop = await cache.cacheGetYourShop(id);
@@ -73,24 +77,45 @@ router.get('/shop/:id', async (req, res) => {
 });
 
 
+router.post('/shop/addNewData', async (req, res) => {
+  const { newData } = req.body;
+  console.log('newData: ', newData);
+  try {
+    //fetching sorted sets from redis
+    const shop = await cache.addNewData(newData);
+    console.log('shop: ', shop);
+    
+    const latestData = await cache.sanityFetch(groq.qfs1df(newData.shop._id));
+    if (!latestData) return res.status(500).json({ error: 'Failed to fetch data from Sanity' })
+      
+    await cache.addCachedScores(latestData);
+
+    res.json(latestData);
+  } catch {
+    res.status(500).json({ error: 'Failed to add new data to cache' });
+  }
+});
+
 
 // how can i update data in json and in cached data?
 // update data in cache and sanity data
-router.put('/shop/:dataId', async (req, res) => {
-  const { shopId } = req.params;
-  const {parentData, updatedData} = req.body;
+router.put('/shop/updatedata', async (req, res) => {
+  const {shopId, updatedData} = req.body;
+  console.log("shopId: ", shopId, "\nupdatedData: ", updatedData);
   try {
-    // Perform validation on updatedData if needed
-
     // Update the data in Sanity.io
     await cache.updateData(updatedData);
+    // upon success
+    // fetch latest data
+    const latestData = await cache.sanityFetch(groq.qfs1df(shopId));
 
+    // if data is empty, return error
+    if (!latestData) res.status(500).json({ error: 'Failed to fetch data from Sanity' })
 
     // Update the data in the cache if necessary
-    await cache.updateCache(parentData);
+    await cache.updateCache(latestData);
 
-
-    res.json(parentData);
+    res.json(latestData);
   } catch (error) {
     console.error('Error updating shop data:', error);
     res.status(500).json({ error: 'Internal server error' });

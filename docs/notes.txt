@@ -1,9 +1,9 @@
 
 postgresql
 
-user: home_server
-pass: jamil
-db name: campusbytesdb_pg
+user: admin
+pass: 
+db name: cb_linode_server
 description:{
     this database will use to gather datas, like. 
         users (including: admins, clients, shopowners, schooladmn ),
@@ -34,15 +34,6 @@ CREATE TABLE IF NOT EXISTS "user" (
     roles VARCHAR(25), 
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP, 
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-);
-
-//will remove
-CREATE TABLE IF NOT EXISTS "group" (
-    groupId INT PRIMARY KEY,
-    itemId VARCHAR(255),
-    price INT,
-    quantity INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
 

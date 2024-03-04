@@ -56,7 +56,7 @@ async function addCachedScores(values) {
 
     // Add the data to the cache set
     await Promise.all(values.map(async (data) => {
-      await redisClient.json.set(`${data._type}:${data._id}`, data);
+      await redisClient.set(`${data._type}:${data._id}`, data);
     }))
     
     console.log('Data added to Redis: Successful', values.length);
@@ -67,13 +67,9 @@ async function addCachedScores(values) {
 
 async function cacheGetYourShop(shopId) {
   try {
-    const result = await redisClient.json.get(`shop:${shopId}`);
+    const result = await redisClient.get(`shop:${shopId}`);
     if (!result) {
-      const fetch = await sanityFetch(groq.qfs1df(shopId))
-      if (!fetch) {
-        console.log('Error: No data found');
-      }
-      return fetch;
+      return null;
     }
     return result;
   } catch (error) {
@@ -202,29 +198,42 @@ async function updateData(updatedData) {
 
 
 //add data
-
-
-//may mali sa part na to.
-//future jamil check yung sanity fetch json format
-async function addNewDataToSanity(shopId, id, item) {
+async function addNewData(newData) {
   try {
-    // Determine the document type based on the item (dish or product)
-    const documentType = item._type === 'dish' ? 'dish' : 'product';
+    // Make a request to the Sanity API to add new data
+    const response = await client
+      .create(newData)
+      .commit();
 
-    // Create a new document in Sanity.io
-    const addedData = await sanity.create({
-      _type: documentType,
-      _id: generateUID(), // You might want to customize the document ID based on your needs
-      shopId: shopId,
-      ...item, // Spread the item properties into the document
-    });
-
-    console.log('Data added to Sanity.io successfully:', addedData);
+    console.log('Data added successfully:', response);
+    return response;
   } catch (error) {
-    console.error('Error adding data to Sanity.io:', error);
+    console.error('Error adding new data to Sanity:', error);
     throw error;
   }
 }
+
+//may mali sa part na to.
+//future jamil check yung sanity fetch json format
+// async function addNewDataToSanity(shopId, id, item) {
+//   try {
+//     // Determine the document type based on the item (dish or product)
+//     const documentType = item._type === 'dish' ? 'dish' : 'product';
+
+//     // Create a new document in Sanity.io
+//     const addedData = await sanity.create({
+//       _type: documentType,
+//       _id: generateUID(), // You might want to customize the document ID based on your needs
+//       shopId: shopId,
+//       ...item, // Spread the item properties into the document
+//     });
+
+//     console.log('Data added to Sanity.io successfully:', addedData);
+//   } catch (error) {
+//     console.error('Error adding data to Sanity.io:', error);
+//     throw error;
+//   }
+// }
 
 //delete data
 async function deleteData(id) {
@@ -264,6 +273,7 @@ module.exports = {
   getDataByKey,
     
   //add data
+  addNewData,
   addCache,
   addNewDataToSanity,
   
