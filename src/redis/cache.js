@@ -97,9 +97,10 @@ async function updateCache(updatedData) {
 // fetiching existing data from redis
 async function getKeysWithPattern(pattern) {
   try {
-    const keys = Promise.all(pattern?.map(async (key) => {
-      return await redisClient.keys(key);
-    }));
+    const keys = await redisClient.keys(pattern);
+    // const keys = Promise.all(pattern?.map(async (key) => {
+    //   return await redisClient.keys(key);
+    // }));
     if (keys && keys.length > 0) {
       console.log('Keys retrieved from Redis:', keys.length);
       return keys;

@@ -19,7 +19,7 @@ router = Router()
 //==============================================
 //fetch
 router.get('/shop/', async (req, res) => {
-  const keypattern = [{pattern:'shop:*'}];
+  const keypattern = 'shop:*';
   try {
     //fetching sorted sets from redis
     //if successful, return data
