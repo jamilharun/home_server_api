@@ -57,12 +57,12 @@ async function cacheAddShopToOwner(shopdata) {
         shopOwner: `owner:${data.shopOwner}`
       };
     }));
-    
+
     console.log('shopGroup: ', shopGroup);
 
     // Add the data to the cache Scores
     await Promise.all(shopGroup.map(async (data) => {
-      await redisClient.zAdd(data.shopOwner, {
+      await redisClient.zadd(data.shopOwner, {
         value: data.shopValue, 
         score: data.shopKey
       },{ NX: true });
