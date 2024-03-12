@@ -56,14 +56,14 @@ router.get('/shop/', async (req, res) => {
 //id == shop owner id
 // use cases when the shop owner is checkedout his shop
 router.get('/shop/:id', async (req, res) => {
-  const { _id } = req.params.id;
+  const { id } = req.params.id;
   console.log('req: ', req.params);;
   try {
     //fetching sorted sets from redis
-    const shop = await cache.cacheGetYourShop(_id);
+    const shop = await cache.cacheGetYourShop(id);
 
     if (!shop) {
-      const data = await cache.sanityFetch(groq.qfs1df(_id));
+      const data = await cache.sanityFetch(groq.qfs1df(id));
 
       if (data) {
         await cache.addCachedScores(data);
