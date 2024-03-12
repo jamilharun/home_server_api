@@ -48,13 +48,22 @@ async function cacheGetShopByOwner(shopId) {
 }
 
 async function cacheAddShopToOwner(shopdata) {
-  const shopGroup = `owner:${shopId}`
   try {
+    // const shopGroup = `owner:${shopdata}`
+    const shopGroup = Promise.all(shopdata.map(async (data)=> {
+      return {
+        shopValue: data.shopName,
+        shopKey: `${data._type}:${data._id}`,
+        shopOwner: `owner:${data.shopOwner}` 
+      }
+    }))
+    console.log('shopGroup: ', shopGroup);
+
     // Add the data to the cache Scores
-    await Promise.all(shopdata.map(async (data) => {
-      await redisClient.zAdd(shopGroup, {
-        value: data.shopName, 
-        score: `${data._type}:${data._id}`
+    await Promise.all(shopGroup.map(async (data) => {
+      await redisClient.zAdd(data.shopOwner, {
+        value: data.shopValue, 
+        score: data.shopKey
       },{ NX: true });
     }));
   } catch (error) {
