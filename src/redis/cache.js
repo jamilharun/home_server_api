@@ -26,15 +26,39 @@ async function addCache(values) {
   }
 };
 
-async function cacheGetYourShop(shopId) {
+async function cacheGetShopByOwner(shopId) {
+  const shopGroup = `owner:${shopId}`
   try {
-    const result = await redisClient.get(`owner:${shopId}`);
+    const result = await redisClient.zRangeWithScores(shopGroup, 0, -1);
+    
     if (!result) {
+      console.log('shop group is empty or do not exist');
       return null;
     }
-    return result;
+    const resJson = JSON.parse(result);
+
+    console.log('shop group retreaved from redis');
+    const shops = await Promise.all(resJson.map(async (data) => {
+      return redisClient.get(JSON.parse(data.score));
+    }))
+    return shops;
+  } catch (error) { 
+    return null;
+  }
+}
+
+async function cacheAddShopToOwner(shopdata) {
+  const shopGroup = `owner:${shopId}`
+  try {
+    // Add the data to the cache Scores
+    await Promise.all(shopdata.map(async (data) => {
+      await redisClient.zAdd(shopGroup, {
+        value: data.shopName, 
+        score: `${data._type}:${data._id}`
+      },{ NX: true });
+    }));
   } catch (error) {
-    console.log('Error fetching data:', error);
+    console.log('Error cacheAddShopToOwner:', error);
     return null;
   }
 }
@@ -246,18 +270,19 @@ async function imagePickertoSanityAssets(imageData) {
 
 module.exports = {
   //fetch data
-  cacheGetYourShop,
 
   getKeysWithPattern,
   getValuesWithPattern,
   sanityFetch,
   getDataByKey,
     
+  cacheGetShopByOwner,
   //add data
   addNewData,
   addCache,
   // addNewDataToSanity,
   
+  cacheAddShopToOwner,
   //updata data
   updateData,
   updateCache,

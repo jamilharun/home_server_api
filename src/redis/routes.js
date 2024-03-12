@@ -61,19 +61,19 @@ router.get('/shop/:id', async (req, res) => {
   console.log('req: ', req.params);
   try {
     //fetching sorted sets from redis
-    const shop = await cache.cacheGetYourShop(id);
+    const shop = await cache.cacheGetShopByOwner(id);
 
     if (!shop) {
       const data = await cache.sanityFetch(groq.qfs1df(id));
 
       if (data) {
-        await cache.addCachedScores(data);
+        await cache.cacheAddShopToOwner(data);
         res.json(data);
       } else {
         res.status(500).json({ error: 'Failed to fetch data from Sanity' });
       }
     } else {
-      res.json(shop);
+      res.json(JSON.parse(shop));
     }
   } catch (error) {
     console.error('Error fetching app shop:', error);
