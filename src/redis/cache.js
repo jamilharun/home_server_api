@@ -50,13 +50,14 @@ async function cacheGetShopByOwner(shopId) {
 async function cacheAddShopToOwner(shopdata) {
   try {
     // const shopGroup = `owner:${shopdata}`
-    const shopGroup = Promise.all(shopdata.map(async (data)=> {
+    const shopGroup = await Promise.all(shopdata.map(async (data) => {
       return {
         shopValue: data.shopName,
         shopKey: `${data._type}:${data._id}`,
-        shopOwner: `owner:${data.shopOwner}` 
-      }
-    }))
+        shopOwner: `owner:${data.shopOwner}`
+      };
+    }));
+    
     console.log('shopGroup: ', shopGroup);
 
     // Add the data to the cache Scores
