@@ -26,7 +26,7 @@ function fetchDataById(id) {
 }
 
 function qfs1df(id) {
-    const query = `*[_type == "shop" && shopOwner == ${id} &&!(_id in path("drafts.**"))] {
+    const query = `*[_type == "shop" && shopOwner == '${id}' &&!(_id in path("drafts.**"))] {
         _type,
         _id,
         isPromoted,
@@ -62,6 +62,7 @@ function qfs1df(id) {
           isAvailable,
           isPromoted,
           _type,
+          shop,
         },
     
         "dishes": *[_type == "dish" && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
@@ -80,6 +81,7 @@ function qfs1df(id) {
           isPromoted,
           isFeatured,
           isAvailable,
+          shop,
         },
       }`;
       return query;
@@ -88,6 +90,7 @@ function qfs1df(id) {
 const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
     _type,
     _id,
+    
     isPromoted,
     description,
     isActive,
@@ -120,6 +123,7 @@ const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
       isAvailable,
       isPromoted,
       _type,
+      shop,
     },
     "dishes": *[_type == "dish" && isAvailable && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
       isPromoted,
@@ -131,6 +135,7 @@ const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
       description,
       _type,
       price,
+      shop,
       image,
       tags[]->{
         _id,

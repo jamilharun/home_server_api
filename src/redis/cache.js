@@ -26,51 +26,9 @@ async function addCache(values) {
   }
 };
 
-
-async function fetchCacheScores() {
-  try {
-    const result = await redisClient.zRangeWithScores('shops', 0, -1);
-  
-    const shops = await Promise.all(result.map(async (data) => {
-      return redisClient.json.get(data.score);
-    }))
-    return shops;
-  } catch (error) { 
-    return null;
-  }
-}
-
-// add data to redis cache
-async function addCachedScores(values) {
-  try {
-    // error handler
-    if (!Array.isArray(values)) {
-      console.log('Error: Values is not an array.');
-      return;
-    }
-
-    // Add the data to the cache Scores
-    // await Promise.all(values.map(async (data) => {
-    //   await redisClient.zAdd('shops', {
-    //     value: data.shopName, 
-    //     score: `${data._type}:${data._id}`
-    //   },{ NX: true });
-    // }));
-
-    // Add the data to the cache set
-    await Promise.all(values.map(async (data) => {
-      await redisClient.set(`${data._type}:${data._id}`, data);
-    }))
-    
-    console.log('Data added to Redis: Successful', values.length);
-  } catch (error) {
-    console.error('Error adding data to Redis:', error);
-  }
-}
-
 async function cacheGetYourShop(shopId) {
   try {
-    const result = await redisClient.get(`shop:${shopId}`);
+    const result = await redisClient.get(`owner:${shopId}`);
     if (!result) {
       return null;
     }
@@ -289,9 +247,6 @@ async function imagePickertoSanityAssets(imageData) {
 module.exports = {
   //fetch data
   cacheGetYourShop,
-
-  fetchCacheScores,
-  addCachedScores,
 
   getKeysWithPattern,
   getValuesWithPattern,
