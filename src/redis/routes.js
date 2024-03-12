@@ -85,8 +85,37 @@ router.post('/shop/addNewData', async (req, res) => {
   const { newData } = req.body;
   console.log('newData: ', newData);
   try {
+    //invert img to sanity accepted format
+    const imgUri = await cache.imagePickertoSanityAssets(newData.image)
+    
+    if (!imgUri) {
+      console.log('Error: No image uri found');
+      res.status(500).json({ error: 'No image uri found' });
+    }
+
+    const prePostData = {
+      _id: newData._id,
+      ...(newData.type === 'dish' && { dishName: newData.dishName }),
+      ...(newData.type === 'product' && { dishName: newData.productName }),
+      shop: newData.shop,
+      _type: newData.type,
+      image: {
+        _type: 'imageObject',
+        assets: {
+          _type: 'reference',
+          _ref: imgUri._id
+        },
+      },
+      ...(newData.type === 'dish' && { dishName: newData.price }),
+      ...(newData.type === 'product' && { dishName: newData.Price }),
+      ...(newData.type === 'dish' && { dishName: newData.preparationTime }),
+      isAvalaible: newData.isAvalaible,
+      isFeatured: newData.isFeatured,
+      isPromoted: newData.isPromoted,
+    }
+    console.log('prePostData: ', prePostData);;
     //insert data to sanity
-    const result = await cache.addNewData(newData);
+    const result = await cache.addNewData(prePostData);
     console.log('result: ', result);
 
     const latestData = await cache.sanityFetch(groq.qfs1df(newData.shop._id));

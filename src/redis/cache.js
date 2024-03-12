@@ -263,6 +263,24 @@ async function deleteCache(key) {
   }
 }
 
+async function imagePickertoSanityAssets(imageData) {
+  try {
+    const result = await sanity.assets
+            .upload('image', imageData?.assets[0]?.uri, { 
+              contentType : imageData?.assets[0]?.type, 
+              filename: imageData?.assets[0]?.fileName});
+    if (!result) {
+      console.log('failed to upload image to sanity.io');
+      return null;
+    } else {
+      console.log('image uploaded to sanity.io');
+      return result;
+    } 
+  } catch (error) {
+    console.log('Error sanity assets failed: ', error);
+  }
+}
+
 module.exports = {
   //fetch data
   cacheGetYourShop,
@@ -287,5 +305,9 @@ module.exports = {
   //delete data
   deleteData,
   deleteCache,
+  
+  //utils
+  imagePickertoSanityAssets  
   //unorganized data
+
 } 
