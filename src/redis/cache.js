@@ -4,7 +4,8 @@ const sanity = require('../lib/sanity');
 const redisClient = require('../lib/redis');
 const groq  = require('./groqQueries');
 const { generateUID } = require('../utils/genUid');
-
+const {basename} = require('path')
+const {createReadStream} = require('fs')
 
 //===============
 //testing
@@ -264,11 +265,15 @@ async function deleteCache(key) {
 }
 
 async function imagePickertoSanityAssets(imageData) {
+  console.log('imageData: ', imageData);
   try {
-    const result = await sanity.assets
-            .upload('image', imageData?.assets[0]?.uri, { 
-              contentType : imageData?.assets[0]?.type, 
-              filename: imageData?.assets[0]?.fileName});
+    const result = await sanity.assets.upload('image', 
+      createReadStream(imageData?.assets[0]?.uri),
+      {filename: basename(imageData?.assets[0]?.uri)})
+    // const result = await sanity.assets
+    //         .upload('image', imageData?.assets[0]?.uri, { 
+    //           contentType : imageData?.assets[0]?.type, 
+    //           filename: imageData?.assets[0]?.fileName});
     if (!result) {
       console.log('failed to upload image to sanity.io');
       return null;
