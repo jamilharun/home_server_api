@@ -28,29 +28,29 @@ async function addCache(values) {
   }
 };
 
-// async function cacheGetShopByOwner(shopId) {
+async function cacheGetShopByOwner(shopId) {
 
-//   const shopGroup = `owner:${shopId}`;
-//   console.log('getting group by owner: ', shopGroup);
+  const shopGroup = `owner:${shopId}`;
+  console.log('getting group by owner: ', shopGroup);
 
-//   await redisClient.zrange(shopGroup, 0, -1,(error,result)=>{
-//     console.log('owner: ',result);
-//     console.log('error: ',error);;
-    
-//     const shops = Promise.all(result.map(async (data) => {
-//       console.log(data);
-//       return redisClient.get(data);
-//     }))
-    
-//     if (error) {
-//       console.log('shop group is empty or do not exist');
-//       return null;
-//     }
+  try {
+    //try get zrange
+    console.log('getting zrange');;
+    const result = await redisClient.zrange(shopGroup, 0 , -1)
 
-//     return shops;
-//   });
+    if (result) {
+      console.log('getting zrange successful', result);
+    } else {
+      console.log('getting zrange failed');
+    }
+  } catch (error) {
+    console.log('Error getting zrange:', error);
+    return null;
+  }
+
   
-// }
+  
+}
 
 async function cacheAddShopToOwner(shopdata) {
   try {
@@ -290,6 +290,7 @@ module.exports = {
   sanityFetch,
   getDataByKey,
     
+  cacheGetShopByOwner,
   //add data
   addNewData,
   addCache,

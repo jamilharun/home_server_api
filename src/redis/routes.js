@@ -3,7 +3,6 @@ const { Router } = require("express");
 const {v4: uuidv4} = require('uuid');
 const cache = require("./cache");
 const groq  = require('./groqQueries');
-const redisClient = require("../lib/redis");
 
 router = Router() 
 
@@ -62,40 +61,23 @@ router.get('/shop/:id', async (req, res) => {
   console.log('req: ', req.params);
   try {
     //fetching sorted sets from redis
-    // const shop = await cache.cacheGetShopByOwner(id);
-    const shopGroup = `owner:${id}`;
-    console.log('getting group by owner: ', shopGroup);
-
-    await redisClient.zrange(shopGroup, 0, -1,(error,result)=>{
-      console.log('owner: ',result);
-      console.log('error: ',error);;
-      
-      const shops = Promise.all(result.map(async (data) => {
-        console.log(data);
-        return redisClient.get(data);
-      }))
-      
-      if (error) {
-        console.log('shop group is empty or do not exist');
-        return null;
-      }
-      console.log('shops: ', shops);
-      return shops;
-    });
+    const result = await cache.cacheGetShopByOwner(id);
     
-
-    if (!shop) {
-      console.log('cacheGetShopByOwner: ',shop);
+    if (!result) {
+      console.log('cacheGetShopByOwner: ',result);
       const data = await cache.sanityFetch(groq.qfs1df(id));
 
       if (data) {
         await cache.cacheAddShopToOwner(data);
         res.json(data);
       } else {
+        //fetching in sanity failed
+        console.log('Error: No data found in sanity');
         res.status(500).json({ error: 'Failed to fetch data from Sanity' });
       }
     } else {
-      res.json(JSON.parse(shop));
+      console.log('cacheGetShopByOwner: ',result);
+      res.json(result);
     }
   } catch (error) {
     console.error('Error fetching app shop:', error);
