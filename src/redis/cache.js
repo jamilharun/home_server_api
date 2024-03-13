@@ -34,14 +34,15 @@ async function cacheGetShopByOwner(shopId) {
   try {
     const result = await redisClient.zRange(shopGroup, 0, -1);
     
+    console.log(result);
     if (!result) {
       console.log('shop group is empty or do not exist');
       return null;
     }
-    const resJson = JSON.parse(result);
+    // const resJson = JSON.parse(result);
 
-    const shops = await Promise.all(resJson.map(async (data) => {
-      return redisClient.get(JSON.parse(data.score));
+    const shops = await Promise.all(result.map(async (data) => {
+      return redisClient.get(data);
     }))
     console.log('shop group retreaved from redis');
     return shops;
