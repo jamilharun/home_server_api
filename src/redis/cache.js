@@ -290,7 +290,6 @@ module.exports = {
   sanityFetch,
   getDataByKey,
     
-  cacheGetShopByOwner,
   //add data
   addNewData,
   addCache,
