@@ -64,6 +64,7 @@ router.get('/shop/:id', async (req, res) => {
     const shop = await cache.cacheGetShopByOwner(id);
 
     if (!shop) {
+      console.log();
       const data = await cache.sanityFetch(groq.qfs1df(id));
 
       if (data) {

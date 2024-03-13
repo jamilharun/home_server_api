@@ -28,7 +28,9 @@ async function addCache(values) {
 };
 
 async function cacheGetShopByOwner(shopId) {
-  const shopGroup = `owner:${shopId}`
+
+  const shopGroup = `owner:${shopId}`;
+  console.log('getting group by owner: ', shopGroup);
   try {
     const result = await redisClient.zRange(shopGroup, 0, -1);
     
@@ -38,10 +40,10 @@ async function cacheGetShopByOwner(shopId) {
     }
     const resJson = JSON.parse(result);
 
-    console.log('shop group retreaved from redis');
     const shops = await Promise.all(resJson.map(async (data) => {
       return redisClient.get(JSON.parse(data.score));
     }))
+    console.log('shop group retreaved from redis');
     return shops;
   } catch (error) { 
     return null;
@@ -65,6 +67,8 @@ async function cacheAddShopToOwner(shopdata) {
       const randomNum = Math.floor(Math.random() * 5) + 1;
       await redisClient.zadd(data.shopOwner, parseFloat(randomNum.toFixed(2)), data.shopValue);
     }));
+
+    console.log('group added to Redis: successful');
   } catch (error) {
     console.log('Error cacheAddShopToOwner:', error);
     return null;
