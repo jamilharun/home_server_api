@@ -7,6 +7,7 @@ const { generateUID } = require('../utils/genUid');
 const {basename} = require('path')
 const {createReadStream} = require('fs');
 const { randomBytes } = require('crypto');
+const { error } = require('console');
 
 //===============
 //testing
@@ -32,17 +33,22 @@ async function cacheGetShopByOwner(shopId) {
   const shopGroup = `owner:${shopId}`;
   console.log('getting group by owner: ', shopGroup);
 
-  const result = await redisClient.zRange(shopGroup, 0, -1);
-  console.log('owner: ',result);
-  
-  if (!result) {
-    console.log('shop group is empty or do not exist');
-    return null;
-  }
+  await redisClient.zrange(shopGroup, 0, -1,(error,result)=>{
+    console.log('owner: ',result);
+    console.log('error: ',error);;
+    
+    const shops = Promise.all(result.map(async (data) => {
+      console.log(data);
+      return redisClient.get(data);
+    }))
 
-  const shops = await Promise.all(result.map(async (data) => {
-    return redisClient.get(data);
-  }))
+    if (error) {
+      console.log('shop group is empty or do not exist');
+      return null;
+    }
+  });
+  
+
 
   console.log('shop group retreaved from redis');
   return shops;
