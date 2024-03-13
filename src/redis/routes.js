@@ -77,7 +77,8 @@ router.get('/shop/:id', async (req, res) => {
       }
     } else {
       console.log('cacheGetShopByOwner: ',result);
-      res.json(result);
+      const shopData = await cache.getValuesWithPattern(result);
+      res.json(shopData);
     }
   } catch (error) {
     console.error('Error fetching app shop:', error);
