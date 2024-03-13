@@ -5,7 +5,8 @@ const redisClient = require('../lib/redis');
 const groq  = require('./groqQueries');
 const { generateUID } = require('../utils/genUid');
 const {basename} = require('path')
-const {createReadStream} = require('fs')
+const {createReadStream} = require('fs');
+const { randomBytes } = require('crypto');
 
 //===============
 //testing
@@ -29,7 +30,7 @@ async function addCache(values) {
 async function cacheGetShopByOwner(shopId) {
   const shopGroup = `owner:${shopId}`
   try {
-    const result = await redisClient.zRangeWithScores(shopGroup, 0, -1);
+    const result = await redisClient.zRange(shopGroup, 0, -1);
     
     if (!result) {
       console.log('shop group is empty or do not exist');
@@ -51,10 +52,11 @@ async function cacheAddShopToOwner(shopdata) {
   try {
     // const shopGroup = `owner:${shopdata}`
     const shopGroup = await Promise.all(shopdata.map(async (data) => {
+      const randomNum = Math.floor(Math.random() * 5) + 1; // Generates a random number between 1 and 5
       return {
-        shopValue: data.shopName,
-        shopKey: `${data._type}:${data._id}`,
-        shopOwner: `owner:${data.shopOwner}`
+        shopKey: randomNum.toString(), // Convert the number to a string if needed
+        shopOwner: `owner:${data.shopOwner}`,
+        shopValue: `${data._type}:${data._id}`,
       };
     }));
 
