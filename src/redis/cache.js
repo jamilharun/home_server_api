@@ -41,18 +41,13 @@ async function cacheGetShopByOwner(shopId) {
       console.log(data);
       return redisClient.get(data);
     }))
-
     if (error) {
       console.log('shop group is empty or do not exist');
       return null;
     }
+
+    return shops;
   });
-  
-
-
-  console.log('shop group retreaved from redis');
-  return shops;
-  
 }
 
 async function cacheAddShopToOwner(shopdata) {
