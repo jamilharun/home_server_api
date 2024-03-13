@@ -3,6 +3,7 @@ const { Router } = require("express");
 const {v4: uuidv4} = require('uuid');
 const cache = require("./cache");
 const groq  = require('./groqQueries');
+const redisClient = require("../lib/redis");
 
 router = Router() 
 
@@ -61,10 +62,30 @@ router.get('/shop/:id', async (req, res) => {
   console.log('req: ', req.params);
   try {
     //fetching sorted sets from redis
-    const shop = await cache.cacheGetShopByOwner(id);
+    // const shop = await cache.cacheGetShopByOwner(id);
+    const shopGroup = `owner:${id}`;
+    console.log('getting group by owner: ', shopGroup);
+
+    await redisClient.zrange(shopGroup, 0, -1,(error,result)=>{
+      console.log('owner: ',result);
+      console.log('error: ',error);;
+      
+      const shops = Promise.all(result.map(async (data) => {
+        console.log(data);
+        return redisClient.get(data);
+      }))
+      
+      if (error) {
+        console.log('shop group is empty or do not exist');
+        return null;
+      }
+      console.log('shops: ', shops);
+      return shops;
+    });
+    
 
     if (!shop) {
-      console.log();
+      console.log('cacheGetShopByOwner: ',shop);
       const data = await cache.sanityFetch(groq.qfs1df(id));
 
       if (data) {

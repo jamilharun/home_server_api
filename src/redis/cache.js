@@ -28,27 +28,29 @@ async function addCache(values) {
   }
 };
 
-async function cacheGetShopByOwner(shopId) {
+// async function cacheGetShopByOwner(shopId) {
 
-  const shopGroup = `owner:${shopId}`;
-  console.log('getting group by owner: ', shopGroup);
+//   const shopGroup = `owner:${shopId}`;
+//   console.log('getting group by owner: ', shopGroup);
 
-  await redisClient.zrange(shopGroup, 0, -1,(error,result)=>{
-    console.log('owner: ',result);
-    console.log('error: ',error);;
+//   await redisClient.zrange(shopGroup, 0, -1,(error,result)=>{
+//     console.log('owner: ',result);
+//     console.log('error: ',error);;
     
-    const shops = Promise.all(result.map(async (data) => {
-      console.log(data);
-      return redisClient.get(data);
-    }))
-    if (error) {
-      console.log('shop group is empty or do not exist');
-      return null;
-    }
+//     const shops = Promise.all(result.map(async (data) => {
+//       console.log(data);
+//       return redisClient.get(data);
+//     }))
+    
+//     if (error) {
+//       console.log('shop group is empty or do not exist');
+//       return null;
+//     }
 
-    return shops;
-  });
-}
+//     return shops;
+//   });
+  
+// }
 
 async function cacheAddShopToOwner(shopdata) {
   try {
