@@ -63,7 +63,7 @@ async function cacheAddShopToOwner(shopdata) {
     // Add the data to the cache Scores
     await Promise.all(shopGroup.map(async (data) => {
       const randomNum = Math.floor(Math.random() * 5) + 1;
-      await redisClient.zadd(data.shopOwner, randomNum, data.shopValue, 'NX');
+      await redisClient.zadd(data.shopOwner, parseFloat(randomNum.toFixed(2)), data.shopValue, 'NX');
     }));
   } catch (error) {
     console.log('Error cacheAddShopToOwner:', error);
