@@ -31,24 +31,22 @@ async function cacheGetShopByOwner(shopId) {
 
   const shopGroup = `owner:${shopId}`;
   console.log('getting group by owner: ', shopGroup);
-  try {
-    const result = await redisClient.zRange(shopGroup, 0, -1);
-    
-    console.log(result);
-    if (!result) {
-      console.log('shop group is empty or do not exist');
-      return null;
-    }
-    // const resJson = JSON.parse(result);
 
-    const shops = await Promise.all(result.map(async (data) => {
-      return redisClient.get(data);
-    }))
-    console.log('shop group retreaved from redis');
-    return shops;
-  } catch (error) { 
+  const result = await redisClient.zRange(shopGroup, 0, -1);
+  console.log('owner: ',result);
+  
+  if (!result) {
+    console.log('shop group is empty or do not exist');
     return null;
   }
+
+  const shops = await Promise.all(result.map(async (data) => {
+    return redisClient.get(data);
+  }))
+
+  console.log('shop group retreaved from redis');
+  return shops;
+  
 }
 
 async function cacheAddShopToOwner(shopdata) {
