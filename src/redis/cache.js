@@ -40,6 +40,7 @@ async function cacheGetShopByOwner(shopId) {
 
     if (result) {
       console.log('getting zrange successful', result);
+      return result;
     } else {
       console.log('getting zrange failed');
     }
