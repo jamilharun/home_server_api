@@ -266,9 +266,9 @@ async function imagePickertoSanityAssets(imageData) {
   try {
       const imgData = new FormData();
       imgData.append('image', {
-        name: result.assets[0].uri,
-        type: result.assets[0].type,
-        uri: result.assets[0].uri,
+        name: imageData.image.assets[0].uri,
+        type: imageData.image.assets[0].type,
+        uri: imageData.image.assets[0].uri,
       });
 
     const result = await sanity.assets.upload('image', imgData)
