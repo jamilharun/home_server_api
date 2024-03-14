@@ -270,9 +270,11 @@ async function imagePickertoSanityAssets(imageData) {
         type: imageData.image.assets[0].type,
         uri: imageData.image.assets[0].uri,
       });
+    console.log('imgData: ', imgData);;
 
     const result = await sanity.assets.upload('image', imgData)
     
+    console.log('result: ', result);
     if (!result) {
       console.log('failed to upload image to sanity.io');
       return null;
