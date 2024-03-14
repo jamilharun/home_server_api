@@ -92,7 +92,7 @@ router.post('/shop/addNewData', async (req, res) => {
   console.log('newData: ', newData);
   try {
     //invert img to sanity accepted format
-    const imgUri = await cache.imagePickertoSanityAssets(newData.image)
+    const imgUri = await cache.imagePickertoSanityAssets(newData)
     
     if (!imgUri) {
       console.log('Error: No image uri found');

@@ -264,13 +264,15 @@ async function deleteCache(key) {
 async function imagePickertoSanityAssets(imageData) {
   console.log('imageData: ', imageData);
   try {
-    const result = await sanity.assets.upload('image', 
-      createReadStream(imageData?.assets[0]?.uri),
-      {filename: basename(imageData?.assets[0]?.uri)})
-    // const result = await sanity.assets
-    //         .upload('image', imageData?.assets[0]?.uri, { 
-    //           contentType : imageData?.assets[0]?.type, 
-    //           filename: imageData?.assets[0]?.fileName});
+      const imgData = new FormData();
+      imgData.append('image', {
+        name: result.assets[0].uri,
+        type: result.assets[0].type,
+        uri: result.assets[0].uri,
+      });
+
+    const result = await sanity.assets.upload('image', imgData)
+    
     if (!result) {
       console.log('failed to upload image to sanity.io');
       return null;
