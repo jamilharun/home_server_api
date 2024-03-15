@@ -88,11 +88,12 @@ router.get('/shop/:id', async (req, res) => {
 
 //insert new data
 router.post('/shop/addNewData', async (req, res) => {
-  const { newData } = req.body;
+  const { newData, formData } = req.body;
   console.log('newData: ', newData);
+  console.log('formData: ', formData);;
   try {
     //invert img to sanity accepted format
-    const imgUri = await cache.imagePickertoSanityAssets(newData)
+    const imgUri = await cache.imagePickertoSanityAssets(formData)
     
     if (!imgUri) {
       console.log('Error: No image uri found');
@@ -127,7 +128,7 @@ router.post('/shop/addNewData', async (req, res) => {
     const latestData = await cache.sanityFetch(groq.qfs1df(newData.shop._id));
     if (!latestData) return res.status(500).json({ error: 'Failed to fetch data from Sanity' })
       
-    await cache.addCachedScores(latestData);
+    await cache.addCache(latestData);
 
     res.json(latestData);
   } catch {

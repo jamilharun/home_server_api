@@ -261,18 +261,11 @@ async function deleteCache(key) {
   }
 }
 
-async function imagePickertoSanityAssets(imageData) {
-  console.log('imageData: ', imageData);
+async function imagePickertoSanityAssets(formData) {
+  console.log('run imagePickertoSanityAssets ');
   try {
-      const imgData = new FormData();
-      imgData.append('image', {
-        name: imageData.image.assets[0].uri,
-        type: imageData.image.assets[0].type,
-        uri: imageData.image.assets[0].uri,
-      });
-    console.log('imgData: ', imgData);;
 
-    const result = await sanity.assets.upload('image', imgData)
+    const result = await sanity.assets.upload('image', formData)
     
     console.log('result: ', result);
     if (!result) {
