@@ -35,14 +35,15 @@ async function cacheGetShopByOwner(shopId) {
 
   try {
     //try get zrange
-    console.log('getting zrange');;
+    console.log('getting zrange');
     const result = await redisClient.zrange(shopGroup, 0 , -1)
 
-    if (result) {
+    if (!result == null || result.length == 0) {
+      console.log('getting zrange failed');
+      return null;
+    } else {
       console.log('getting zrange successful', result);
       return result;
-    } else {
-      console.log('getting zrange failed');
     }
   } catch (error) {
     console.log('Error getting zrange:', error);

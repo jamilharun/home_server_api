@@ -206,12 +206,17 @@ router.delete('/shop/deleteData', async (req, res) => {
   try {
     // Delete the data in Sanity.io
     //data._id should associate to dish/product id
-    await cache.deleteData(data._id);
+    const result = await cache.deleteData(data._id);
+    if (!result) {
+      console.log('data do not exist || failed');
+      res.status(400).json({ error: 'Failed to delete data in Sanity' });
+    }
 
-    const refetch = await cache.cacheGetYourShop(data.shop._id);
+    const refetch = await cache.sanityFetch(groq.qfs1df(data.shop._ref));
     if (!refetch) {
       res.json({ error: 'No data found' });
-    } else {
+    } else { 
+      console.log('SHOP refetch: ');
       res.json({ refetch });
     }
   } catch (error) {
