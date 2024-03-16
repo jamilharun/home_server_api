@@ -23,12 +23,12 @@ router = Router()
 const multer = require("multer");
 
 const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
+  destination: function(req, file, cb) {
     cb(null, '../../images/')
   },
-  filename: (req, file, cb)=> {
+  filename: function(req, file, cb) {
     console.log(file)
-    cb(null, Data.now() + path.extname(file.originalname))
+    cb(null, `${Data.now()}_${file.originalname}`)
   }
 })
 
@@ -106,13 +106,13 @@ router.get('/shop/:id', async (req, res) => {
 });
 
 
-// router.post('/upload', upload.single('image') , uploadFiles);
+router.post('/upload', upload.single('image') , uploadFiles);
 
-// function uploadFiles(req, res) {
-//   console.log(req.body);
-//   console.log(req.files);
-//   res.json({ message: "Successfully uploaded files" });
-// }
+function uploadFiles(req, res) {
+  console.log(req.body);
+  console.log(req.files);
+  res.json({ message: "Successfully uploaded files" });
+}
 
 //insert new data
 router.post('/shop/addNewData' ,async (req, res) => {
