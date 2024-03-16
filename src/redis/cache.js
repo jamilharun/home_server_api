@@ -265,7 +265,7 @@ async function imagePickertoSanityAssets(formData) {
   console.log('run imagePickertoSanityAssets ');
   try {
 
-    const result = await sanity.assets.upload('image', formData)
+    const result = await sanity.assets.upload('image', formData._parts[0])
     
     console.log('result: ', result);
     if (!result) {

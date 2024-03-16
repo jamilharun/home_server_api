@@ -111,7 +111,7 @@ router.post('/upload', upload.single('image') , uploadFiles);
 function uploadFiles(req, res) {
   console.log(JSON.stringify(req.body));
   console.log(req.files);
-  res.json({ message: "Successfully uploaded files" });
+  res.json({ message: "test succesful" });
 }
 
 //insert new data
