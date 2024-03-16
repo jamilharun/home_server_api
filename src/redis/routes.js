@@ -32,10 +32,10 @@ router = Router()
 // testing
 
 
-router.post("/upload", upload.single('image'), async (req, res) => {
-  console.log(req.file);
-  res.send('File uploaded');
-})
+// router.post("/upload", upload.single('image'), async (req, res) => {
+//   console.log(req.file);
+//   res.send('File uploaded');
+// })
 
 
 //==============================================
