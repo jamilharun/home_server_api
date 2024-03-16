@@ -119,7 +119,7 @@ router.post('/shop/addNewData' ,async (req, res) => {
   // console.log(req);
   const { newData, formData } = req.body;
   console.log('newData: ', newData);
-  console.log('formData: ', JSON.parse(formData) );;
+  console.log('formData: ', formData);
   try {
     //invert img to sanity accepted format
     const imgUri = await cache.imagePickertoSanityAssets(formData)
