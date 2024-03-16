@@ -183,7 +183,7 @@ router.put('/shop/updatedata', async (req, res) => {
     }
     // upon success
     // fetch latest data
-    const latestData = await cache.sanityFetch(groq.qfs1df(updatedData.shop._id));
+    const latestData = await cache.sanityFetch(groq.qfs1df(updatedData.shop._ref));
 
     // if data is empty, return error
     if (!latestData) {
