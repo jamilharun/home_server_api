@@ -110,7 +110,10 @@ router.post('/upload', upload.single('image') , uploadFiles);
 
 function uploadFiles(req, res) {
   console.log(JSON.stringify(req.body));
-  console.log(req.files);
+  console.log(req.file);
+  if (!req.file) {
+    return res.status(400).send('No image uploaded!');
+  }
   res.json({ message: "test succesful" });
 }
 

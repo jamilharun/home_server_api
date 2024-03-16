@@ -13,8 +13,9 @@ const port = 3000;
 const hostname = '127.0.0.1'; //example hostname
  
 app.use(express.urlencoded({ extended: true }));
-app.use(bodyParser.json());
 app.use(express.json());
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded());
 
 // the databases used in this api 
 app.use("/api/postgres", userRoutes);
