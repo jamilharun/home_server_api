@@ -87,7 +87,7 @@ function qfs1df(id) {
       return query;
 }
 
-const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
+const qfsdf = `*[_type == "shop" &&!(_id in path("drafts.**"))]{
     _type,
     _id,
     
@@ -107,7 +107,7 @@ const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
       tagName,
       color
     },
-    "products": *[_type == 'product' && isAvailable && !(_id in path("drafts.**")) && shop._ref == ^._id] {
+    "products": *[_type == 'product' && !(_id in path("drafts.**")) && shop._ref == ^._id] {
       _id,
       productName,
       slug,
@@ -125,7 +125,7 @@ const qfsdf = `*[_type == "shop" && isActive &&!(_id in path("drafts.**"))]{
       _type,
       shop,
     },
-    "dishes": *[_type == "dish" && isAvailable && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
+    "dishes": *[_type == "dish" && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
       isPromoted,
       dishName,
       isFeatured,
