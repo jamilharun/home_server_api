@@ -10,8 +10,9 @@ const userRoutes = require('./src/user/routes');
 
 const app = express();
 const port = 3000;
-const hostname = '127.0.0.1'; //example hostname 
-
+const hostname = '127.0.0.1'; //example hostname
+ 
+app.use(express.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.json());
 

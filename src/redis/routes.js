@@ -20,10 +20,11 @@ router = Router()
 // testing
 
 // router.route()
-const multer = require('multer');
+const multer = require("multer");
+
 const storage = multer.diskStorage({
   destination: (req, file, cb) => {
-    cb(null, '../../images')
+    cb(null, '../../images/')
   },
   filename: (req, file, cb)=> {
     console.log(file)
@@ -32,16 +33,6 @@ const storage = multer.diskStorage({
 })
 
 const upload = multer({ storage: storage });
-
-
-
-router.post("/upload", upload.single('image'), async (req, res) => {
-  console.log(req);
-  if (!req.file) {
-    return res.status(400).send('No image uploaded!');
-  }
-  res.json(res.file);
-})
 
 
 //==============================================
@@ -115,13 +106,20 @@ router.get('/shop/:id', async (req, res) => {
 });
 
 
+// router.post('/upload', upload.single('image') , uploadFiles);
+
+// function uploadFiles(req, res) {
+//   console.log(req.body);
+//   console.log(req.files);
+//   res.json({ message: "Successfully uploaded files" });
+// }
 
 //insert new data
-router.post('/shop/addNewData', async (req, res) => {
-  console.log(req);
-  // const { newData, formData } = req.body;
-  // console.log('newData: ', newData);
-  // console.log('formData: ', formData);;
+router.post('/shop/addNewData' ,async (req, res) => {
+  // console.log(req);
+  const { newData, formData } = req.body;
+  console.log('newData: ', newData);
+  console.log('formData: ', JSON.parse(formData) );;
   try {
     //invert img to sanity accepted format
     const imgUri = await cache.imagePickertoSanityAssets(formData)
