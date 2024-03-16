@@ -109,7 +109,7 @@ router.get('/shop/:id', async (req, res) => {
 router.post('/upload', upload.single('image') , uploadFiles);
 
 function uploadFiles(req, res) {
-  console.log(req.body);
+  console.log(JSON.stringify(req.body));
   console.log(req.files);
   res.json({ message: "Successfully uploaded files" });
 }
