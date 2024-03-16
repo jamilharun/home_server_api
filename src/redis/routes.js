@@ -4,19 +4,6 @@ const {v4: uuidv4} = require('uuid');
 const cache = require("./cache");
 const groq  = require('./groqQueries');
 
-const multer = require('multer');
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => {
-    cb(null, '../../images')
-  },
-  filename: (req, file, cb)=> {
-    console.log(file)
-    cb(null, Data.now() + path.extname(file.originalname))
-  }
-})
-
-const upload = multer({ storage: storage })
-          .single('image');
 
 router = Router() 
 
@@ -33,10 +20,27 @@ router = Router()
 // testing
 
 // router.route()
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../../images')
+  },
+  filename: (req, file, cb)=> {
+    console.log(file)
+    cb(null, Data.now() + path.extname(file.originalname))
+  }
+})
 
-router.post("/upload", upload, async (req, res) => {
+const upload = multer({ storage: storage });
+
+
+
+router.post("/upload", upload.single('image'), async (req, res) => {
+  if (!req.file) {
+    return res.status(400).send('No image uploaded!');
+  }
   console.log(req);
-  res.send('File uploaded');
+  res.json(res.file);
 })
 
 
