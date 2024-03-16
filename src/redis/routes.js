@@ -176,7 +176,11 @@ router.put('/shop/updatedata', async (req, res) => {
   console.log("updatedData: ", updatedData);
   try {
     // Update the data in Sanity.io
-    await cache.updateData(updatedData);
+    const isitSuccess = await cache.updateData(updatedData);
+    if (!isitSuccess) {
+      console.log('no it failed');
+      res.status(500).json({ error: 'Failed to update data in Sanity' });
+    }
     // upon success
     // fetch latest data
     const latestData = await cache.sanityFetch(groq.qfs1df(updatedData.shop._id));

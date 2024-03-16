@@ -177,20 +177,20 @@ async function getDataByKey(key) {
 async function updateData(updatedData) {
   try {
     // Fetch the existing data from Sanity.io
-    const existingData = await sanity.fetch(groq.fetchDataById(updatedData._id));  
-    if (!existingData) {
-      throw new Error(`Shop with ID ${updatedData._id} not found in Sanity.io`);
-    }
+    // const existingData = await sanity.fetch(groq.fetchDataById(updatedData._id));  
+    // if (!existingData) {
+    //   throw new Error(`Shop with ID ${updatedData._id} not found in Sanity.io`);
+    // }
     // Combine existing data with updated data
-    const mergedData = { ...existingData, ...updatedData };
+    // const mergedData = { ...existingData, ...updatedData };
 
     // Update the data in Sanity.io
     await sanity
       .patch(updatedData._id)
-      .set(mergedData)
+      .set(updatedData)
       .commit();
 
-    return mergedData;
+    return true;
   } catch (error) {
     console.error('Error updating shop data in Sanity.io:', error);
     throw error;
