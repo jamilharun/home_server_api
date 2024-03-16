@@ -2,20 +2,17 @@ const express = require('express');
 const bodyParser = require('body-parser');
 
 const pool = require('./src/lib/postgres');
-// const sanity = require('./src/lib/sanity');
 const redisRoutes = require('./src/redis/routes');
 const userRoutes = require('./src/user/routes');
-// const { generateToken, verifyToken } = require('./src/utils/auth');
-// const { generatedUID} = require('./genUid')
 
 const app = express();
 const port = 3000;
-const hostname = '127.0.0.1'; //example hostname
+// const hostname = '127.0.0.1'; //example hostname
  
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.json());
-app.use(bodyParser.urlencoded());
+app.use(bodyParser.urlencoded({ extended: false }));
 
 // the databases used in this api 
 app.use("/api/postgres", userRoutes);
