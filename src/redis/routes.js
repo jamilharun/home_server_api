@@ -4,6 +4,19 @@ const {v4: uuidv4} = require('uuid');
 const cache = require("./cache");
 const groq  = require('./groqQueries');
 
+const multer = require('multer');
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+    cb(null, '../../images')
+  },
+  filename: (req, file, cb)=> {
+    console.log(file)
+    cb(null, Data.now() + path.extname(file.originalname))
+  }
+})
+
+const upload = multer({ storage: storage }).single('image');
+
 router = Router() 
 
 //==============================================
@@ -15,6 +28,15 @@ router = Router()
 
   codes located in the trashcodes.js
 */
+
+// testing
+
+
+router.post("/upload", upload.single('image'), async (req, res) => {
+  console.log(req.file);
+  res.send('File uploaded');
+})
+
 
 //==============================================
 //fetch
@@ -86,11 +108,14 @@ router.get('/shop/:id', async (req, res) => {
   }
 });
 
+
+
 //insert new data
 router.post('/shop/addNewData', async (req, res) => {
-  const { newData, formData } = req.body;
-  console.log('newData: ', newData);
-  console.log('formData: ', formData);;
+  console.log(req);
+  // const { newData, formData } = req.body;
+  // console.log('newData: ', newData);
+  // console.log('formData: ', formData);;
   try {
     //invert img to sanity accepted format
     const imgUri = await cache.imagePickertoSanityAssets(formData)
