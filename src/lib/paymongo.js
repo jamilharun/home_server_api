@@ -1,6 +1,6 @@
 
-require('dotenv').config();
-const paymongo = require('paymongo-node')(process.env.NODE_ENV_PAYMONGO_SECRET);
+// require('dotenv').config();
+// const paymongo = require('paymongo-node')(process.env.NODE_ENV_PAYMONGO_SECRET);
 
 // const createPayIntent = (amount) => {
 //     paymongo.paymentIntents.create({
