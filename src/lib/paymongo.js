@@ -2,76 +2,85 @@
 require('dotenv').config();
 const paymongo = require('paymongo-node')(process.env.NODE_ENV_PAYMONGO_SECRET);
 
-const createPayIntent = (amount) => {
-    paymongo.paymentIntents.create({
-      amount: amount,
-      payment_method_allowed: ['paymaya', 'gcash'],
-      payment_method_options: {card: {request_three_d_secure: 'any'}},
-      currency: 'PHP',
-      capture_type: 'automatic',
-      description: 'gcash and paymaya only'
+// const createPayIntent = (amount) => {
+//     paymongo.paymentIntents.create({
+//       amount: amount,
+//       payment_method_allowed: ['paymaya', 'gcash'],
+//       payment_method_options: {card: {request_three_d_secure: 'any'}},
+//       currency: 'PHP',
+//       capture_type: 'automatic',
+//       description: 'gcash and paymaya only'
   
-    })
-      .then(function(resource) {
-        console.log(resource);
-        return resource;
-      })
-      .catch(function(e) {
-        if (e.type === "AuthenticationError") {
-          // Handle authentication error
-        } else if (e.type === "InvalidRequestError") {
-          // Handle validation errors
-          e.errors.forEach(function (error) {
-            console.log(error.code);
-            console.log(error.detail);
-          })
-        }
-        return e;
-      });
-}
+//     })
+//       .then(function(resource) {
+//         console.log(resource);
+//         return resource;
+//       })
+//       .catch(function(e) {
+//         if (e.type === "AuthenticationError") {
+//           // Handle authentication error
+//         } else if (e.type === "InvalidRequestError") {
+//           // Handle validation errors
+//           e.errors.forEach(function (error) {
+//             console.log(error.code);
+//             console.log(error.detail);
+//           })
+//         }
+//         return e;
+//       });
+// }
+/* 
+sample payment intent:
+sk_test_JJinNnvdVnC5DqKxVdsMhREe  //gcash n paymaya only //used
+pi_KKdkwyaxzg6euGPz1bXHZB9X
+*/
 
+// const createPayMethod = (name, email, phone, method) => {
+//   paymongo.paymentMethods.create({
+//     billing: {name: name, email: email, phone: phone},
+//     type: method
+//   })
+//   .then(({ data }) => {
+//     console.log(data)
+//     return data;
+//   })
+//   .catch(err => {
+//     console.error(err)
+//     return err;
+//   });
+// }
+/* 
+samole payment method:
+pm_44fS7EqURKYWDZ7M8yWGyNnC
+pm_zNGCATDawdnpRunavigation.goBack()navigation.goBack()bRYi8cVZNw
+*/
 
-const createPayMethod = (name, email, phone, method) => {
-  paymongo.paymentMethods.create({
-    billing: {name: name, email: email, phone: phone},
-    type: method
-  })
-  .then(({ data }) => {
-    console.log(data)
-    return data;
-  })
-  .catch(err => {
-    console.error(err)
-    return err;
-  });
-}
+// const attachPayIntent = (payIntId, payMetId) => {
+//   paymongo.paymentIntents.attach({
+//     payment_method: payMetId,
+//     return_url: 'https://www.paymongo.com/academy/the-paymongo-dashboard'
+//   },{id: payIntId})
+//   .then(({ data }) => {
+//     console.log(data)
+//     return data;
+//   })
+//   .catch(err => {
+//     console.error(err)
+//     return err;
+//   });
+// }
 
-const attachPayIntent = (payIntId, payMetId) => {
-  paymongo.paymentIntents.attach({
-    payment_method: payMetId,
-    return_url: 'https://www.paymongo.com/academy/the-paymongo-dashboard'
-  },{id: payIntId})
-  .then(({ data }) => {
-    console.log(data)
-    return data;
-  })
-  .catch(err => {
-    console.error(err)
-    return err;
-  });
-}
-
-const pay = async (req, res) => {
-  const {amount, name, email, phone, method} = req.body;
-  try {
-    const payInt = await createPayIntent(amount);
+// const pay = async (req, res) => {
+//   const {amount, name, email, phone, method} = req.body;
+//   try {
+//     const payInt = await createPayIntent(amount);
     
 
-    const payMet = await createPayMethod(name, email, phone, method);
-    if (payMet.errors) {
-      console.log('error', payMet.errors);
-      res.status(400).json({ message: payMet.errors})
-    } 
+//     const payMet = await createPayMethod(name, email, phone, method);
+//     if (payMet.errors) {
+//       console.log('error', payMet.errors);
+//       res.status(400).json({ message: payMet.errors})
+//     } 
 
     // let payIntId = payInt.data.id;
     // let payMetId = payMet.data.id;
@@ -82,11 +91,11 @@ const pay = async (req, res) => {
     // }
 
     // res.status(200).json(attPay);
-  } catch (error) {
-    console.log(error);
-    res.status(400).json({ message: error})
-  }
-}
+//   } catch (error) {
+//     console.log(error);
+//     res.status(400).json({ message: error})
+//   }
+// }
 
 module.exports = {
   createPayIntent,
