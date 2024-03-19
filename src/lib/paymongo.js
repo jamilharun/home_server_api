@@ -29,11 +29,7 @@ const createPayIntent = (amount) => {
         return e;
       });
 }
-/* 
-sample payment intent:
-sk_test_JJinNnvdVnC5DqKxVdsMhREe  //gcash n paymaya only //used
-pi_KKdkwyaxzg6euGPz1bXHZB9X
-*/
+
 
 const createPayMethod = (name, email, phone, method) => {
   paymongo.paymentMethods.create({
@@ -49,11 +45,6 @@ const createPayMethod = (name, email, phone, method) => {
     return err;
   });
 }
-/* 
-samole payment method:
-pm_44fS7EqURKYWDZ7M8yWGyNnC
-pm_zNGCATDawdnpRunavigation.goBack()navigation.goBack()bRYi8cVZNw
-*/
 
 const attachPayIntent = (payIntId, payMetId) => {
   paymongo.paymentIntents.attach({
