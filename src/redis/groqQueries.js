@@ -84,7 +84,69 @@ function qfs1df(id) {
           shop,
         },
       }`;
-      return query;
+    return query;
+}
+
+function qfslid(id) {
+  const query = `*[_type == "shop" && shop._ref == '${id}' &&!(_id in path("drafts.**"))] {
+    _type,
+    _id,
+    isPromoted,
+    description,
+    isActive,
+    logo,
+    slug,
+    shopOwner,
+    cover,
+    isFeatured,
+    longitude,
+    latitude,
+    shopName,
+    tags[]->{
+      _id,
+      tagName,
+      color,
+    },
+
+    "products": *[_type == 'product' && !(_id in path("drafts.**")) && shop._ref == ^._id] {
+      _id,
+      productName,
+      slug,
+      tags[]->{
+        _id,
+        tagName,
+        color,
+      },
+      image,
+      Price,
+      description,
+      isFeatured,
+      isAvailable,
+      isPromoted,
+      _type,
+      shop,
+    },
+
+    "dishes": *[_type == "dish" && !(_id in path("drafts.**")) && shop._ref == ^._id ] {
+      _id,
+      dishName,
+      _type,
+      description,
+      price,
+      image,
+      preparationTime,
+      tags[]->{
+        _id,
+        tagName,
+        color,
+      },
+      isPromoted,
+      isFeatured,
+      isAvailable,
+      shop,
+    },
+  }`;
+return query;
 }
 
 const qfsdf = `*[_type == "shop" &&!(_id in path("drafts.**"))]{
@@ -155,5 +217,6 @@ module.exports = {
     // fetchDataByShopIdAndAllAssets
     
     qfs1df,
-    qfsdf
+    qfslid,
+    qfsdf,
 }

@@ -4,6 +4,7 @@ const bodyParser = require('body-parser');
 const redisRoutes = require('./src/redis/routes');
 const userRoutes = require('./src/user/routes');
 const orderRoutes = require('./src/order/routes');
+const pay = require('./src/lib/paymongo');
 
 
 const app = express();
@@ -27,6 +28,8 @@ app.use("/api/sanity", redisRoutes);
 app.get('/', (req, res) => {
   res.send('it wotks')
 })
+
+app.post('/testpay', pay.pay)
 //this is supposed to notify my when there are updated data in sanitydb
 // SSE endpoint
 app.get('/sse', (req, res) => {

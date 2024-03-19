@@ -18,6 +18,11 @@ const editNickname = 'UPDATE "user" SET nickname = $1 WHERE userid = $2;'
 const editPasswordHash = 'UPDATE "user" SET password_hash = $1 WHERE userid = $2;'
 
 const editPhonenumber = 'UPDATE "user" SET phonenumber = $1 WHERE userid = $2;'
+
+const insertUser =  'INSERT INTO "user" ' +
+                    '(userid, given_name, family_name, nickname, name, email, phoneNumber) ' +
+                    'VALUES ($1, $2, $3, $4, $5, $6, $7)' +
+                    'ON CONFLICT (userid) DO NOTHING';
 //-- Assuming you have a "user" table with columns including "image" of type BYTEA
 // const insertImage -  'INSERT INTO "user" (userid, image) VALUES ('your_user_id', E'\\x' || encode('your_binary_image_data', 'hex'))'
 
@@ -32,5 +37,6 @@ module.exports = {
     editNickname,
     editGivenName,
     editPasswordHash,
-    editPhonenumber
+    editPhonenumber,
+    insertUser
 }

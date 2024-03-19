@@ -15,5 +15,9 @@ router.post("/user/register", controller.createUser);
 router.post("/user/login", controller.loginUser);
 
 router.post("/user/editUserInfo", controller.editUser);
+
+//insert auth0 user
+router.post("/user/insertUser", controller.insertUser);
     
+
 module.exports = router;

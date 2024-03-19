@@ -119,11 +119,29 @@ const editUser = async (req, res) => {
   }
 };
 
+const insertUser = async (req, res) => {
+  console.log('insert User');
+  const { userId, given_name, family_name, nickname, name, email, phoneNumber } = req.body;
+  try {
+    // Execute the SQL query to insert a new user
+    const values = [userId, given_name, family_name, nickname, name, email, phoneNumber];
+    await pool.query(queries.insertUser, values);
+
+    // Send a success response
+    res.status(201).send('User inserted successfully');
+  } catch (error) {
+    console.error('Error inserting user:', error);
+    // Send an error response
+    res.status(500).send('Internal Server Error');
+  }
+};
+
 
 module.exports = {
     getUsers,
     getUserById,
     createUser,
     loginUser,
-    editUser
+    editUser,
+    insertUser
 }
