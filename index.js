@@ -6,6 +6,8 @@ const userRoutes = require('./src/user/routes');
 const orderRoutes = require('./src/order/routes');
 const pay = require('./src/lib/paymongo');
 
+const test = require('./src/test')
+test.test()
 
 const app = express();
 const port = 3000;
@@ -24,12 +26,12 @@ app.use((err, req, res, next) => {
 app.use("/api/postgres", orderRoutes);
 app.use("/api/postgres", userRoutes);
 app.use("/api/sanity", redisRoutes);
+app.use("/api/paymongo", pay)
 
 app.get('/', (req, res) => {
   res.send('it wotks')
 })
 
-app.post('/testpay', pay.pay)
 //this is supposed to notify my when there are updated data in sanitydb
 // SSE endpoint
 app.get('/sse', (req, res) => {
@@ -57,6 +59,7 @@ app.get('/sse', (req, res) => {
     res.end();
   });
 });
+
 
 
 app.listen(port, () => {

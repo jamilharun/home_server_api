@@ -36,19 +36,6 @@ CREATE TABLE IF NOT EXISTS "user" (
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
-CREATE TABLE IF NOT EXISTS "order" (
-    orderId SERIAL PRIMARY KEY,
-    orderRef VARCHAR(250),
-    userId VARCHAR(256) REFERENCES "user"(userid),
-    group INT,
-    quantity INT,
-    totalPrice INT,
-    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-    ServiceTax INT DEFAULT 0,
-    totalamount INT DEFAULT 0,
-);
-
 CREATE TABLE IF NOT EXISTS "cart" (
     cartId SERIAL PRIMARY KEY,
     groupNum INT,
@@ -59,16 +46,14 @@ CREATE TABLE IF NOT EXISTS "cart" (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
-
-ALTER TABLE "order"
-ADD COLUMN totalamount INT DEFAULT 0;  
-
 CREATE TABLE IF NOT EXISTS "checkout" (
     checkOutId SERIAL PRIMARY KEY,
-    userRef VARCHAR(256),
+    paymentRef INT REFERENCES "payment"(paymentId),
+    userRef VARCHAR(256) REFERENCES "user"(userid),
     shopRef VARCHAR(256),
     groupNum INT,
-    ServiceTax INT DEFAULT 0,
+    serviceTax INT DEFAULT 0,
+    deliveryFee INT DEFAULT 0,
     totalamount INT DEFAULT 0,
     location VARCHAR(256),
     isSpecial BOOLEAN DEFAULT false,
@@ -77,8 +62,21 @@ CREATE TABLE IF NOT EXISTS "checkout" (
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
 );
 
+CREATE TABLE IF NOT EXISTS "payment" (
+    paymentId SERIAL PRIMARY KEY,
+    paymentInt VARCHAR(150),
+    paymentMet VARCHAR(150),
+    paySuccess BOOLEAN DEFAULT false,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
 
-
+// optional and not necessary
+CREATE TABLE IF NOT EXISTS "paymongo" {
+    paymongoId SERIAL PRIMARY KEY,
+    public VARCHAR(150),
+    secret VARCHAR(150),
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+}
 //this is shop verification. 
 validation{
     user,
