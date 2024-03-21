@@ -18,10 +18,13 @@ router.post('/initializePay', async (req, res)=>{
       secret: process.env.NODE_ENV_PAYMONGO_SECRET_jamil
     };
     console.log(envdata);
-  } if (_id === '') {
-    
+  } if (_id === '7d66bd84-ca24-454d-8b5b-b317146c339c') {
+    envdata =  {
+      public: process.env.NODE_ENV_PAYMONGO_PUBLIC_shaina,
+      secret: process.env.NODE_ENV_PAYMONGO_SECRET_shaina
+    };
   } else {
-    
+    console.log('keys not available');
   }
   const base64TestSecretKey = Buffer.from(envdata.secret).toString('base64');
 
