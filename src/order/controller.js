@@ -28,10 +28,10 @@ const getOrders = async (req, res) => {
 
 const createOrder = async (req, res) => {
     console.log('create order');
-    const { userRef, shopRef, groupNum, serviceTax, totalAmount, location, isSpecial, isFinished, created_at } = req.body;
+    const {paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, isSpecial, isFinished, created_at } = req.body;
     const isCanceled = null; //default value upon create order
     try {
-        const values = [userRef, shopRef, groupNum, serviceTax, totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
+        const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
         const result = await pool.query(queries.createOrder, values);
         const outPut = result.rows[0]; // Assuming you want to return the first inserted row
         console.log('outPut: ', outPut);
@@ -67,11 +67,17 @@ const createOrder = async (req, res) => {
 const createCart = async (req, res) => {
     console.log('create cart');
     const { groupNum, cartItem, created_at } = req.body;
+    console.log(cartItem);
     try {
-        for (const item of cartItem) {
-            const { _id: itemRef, quantity, price } = item;
+        for (const items of cartItem) {
+            const item = items[0];
+            
+            const itemRef = item._id;
+            const quantity = items.length;
+            const price = item.price;
             const subTotalPrice = quantity * price;
-            const values = [groupNum, itemRef, quantity, subTotalPrice, created_at];
+            
+            const values = [groupNum, itemRef, quantity, price, subTotalPrice, created_at];
 
             try {
                 const result = await pool.query(queries.createCart, values);

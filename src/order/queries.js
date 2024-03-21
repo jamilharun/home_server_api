@@ -4,12 +4,12 @@ const getOrders   = 'SELECT * ' +
 
 //buyyer
 const createOrder = 'INSERT INTO "checkout" '+ 
-                    '(userRef, shopRef, groupNum, serviceTax, totalamount, location, isSpecial, isCanceled, isFinished, created_at) ' +
+                    '(paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalamount, location, isSpecial, isCanceled, isFinished, created_at) ' +
                     'VALUES ' +
-                    '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING *;';
+                    '($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING *;';
 //buyyer
 const createCart =  'INSERT INTO "cart" '+
-                    '(groupNum, itemRef, quantity, subTotalPrice, created_at) '+
+                    '(groupNum, itemRef, quantity, price, subTotalPrice, created_at) '+
                     'VALUES '+
                     '($1, $2, $3, $4, $5) RETURNING *';
 //buyyer
