@@ -28,10 +28,14 @@ const getOrders = async (req, res) => {
 
 const createOrder = async (req, res) => {
     console.log('create order');
-    const {paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, isSpecial, isFinished, created_at } = req.body;
+    const { paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, 
+            location, isSpecial, isFinished, created_at } = req.body;
     const isCanceled = null; //default value upon create order
+
+    console.log(req.body);
     try {
-        const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
+        const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, 
+                        totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
         const result = await pool.query(queries.createOrder, values);
         const outPut = result.rows[0]; // Assuming you want to return the first inserted row
         console.log('outPut: ', outPut);
