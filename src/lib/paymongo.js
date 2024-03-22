@@ -81,10 +81,11 @@ router.post('/initializePay', async (req, res)=>{
     //   crePayMet: createPayMethod.data,
     //   attPayInt: attachPayIntent.data
     // });
-    const query = `INSERT INTO payment (paymentInt, paymentMet, created_at) VALUES ($1, $2, $3)`;  
+    const query = `INSERT INTO payment (paymentInt, paymentMet, created_at) VALUES ($1, $2, $3) RETURNING *;`;  
     const result = await pool.query(query, [createPayIntent.data.data.id, createPayMethod.data.data.id, created_at]);
 
     res.json({
+      result,
       createPayIntent: createPayIntent.data,
       createPayMethod: createPayMethod.data,
       attachPayIntent: attachPayIntent.data,
