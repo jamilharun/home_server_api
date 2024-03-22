@@ -85,7 +85,7 @@ router.post('/initializePay', async (req, res)=>{
     const result = await pool.query(query, [createPayIntent.data.data.id, createPayMethod.data.data.id, created_at]);
 
     res.json({
-      result,
+      result: result.rows[0],
       createPayIntent: createPayIntent.data,
       createPayMethod: createPayMethod.data,
       attachPayIntent: attachPayIntent.data,
