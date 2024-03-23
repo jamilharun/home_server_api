@@ -6,8 +6,8 @@ const userRoutes = require('./src/user/routes');
 const orderRoutes = require('./src/order/routes');
 const pay = require('./src/lib/paymongo');
 
-const test = require('./src/test')
-test.test()
+// const test = require('./src/test')
+// test.test()
 
 const app = express();
 const port = 3000;
@@ -28,10 +28,28 @@ app.use("/api/postgres", userRoutes);
 app.use("/api/sanity", redisRoutes);
 app.use("/api/paymongo", pay)
 
-app.get('/', (req, res) => {
-  res.send('it wotks')
-})
+app.get('/', async (req, res) => {
+  const data = [
+    {
+      id: 1,
+      nameL: "data1"
+    },
+    {
+      id: 2,
+      nameL: "data2"
+    },
+    {
+      id: 3,
+      nameL: "data3"
+    },
+  ];
 
+  // Map over data to extract only the id fields
+  const result = data.map(d => d.id);
+
+  // Send the result as JSON response
+  res.json(result);
+});
 //this is supposed to notify my when there are updated data in sanitydb
 // SSE endpoint
 app.get('/sse', (req, res) => {

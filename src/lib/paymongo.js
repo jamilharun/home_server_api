@@ -96,6 +96,7 @@ router.post('/initializePay', async (req, res)=>{
   }
 });
 
+// nasama na pla to sa initialize pay
 router.post('/addPayment', async (req, res) => {
   console.log('record payment');
   const { createPayIntent, createPayMethod, created_at } = req.body;
@@ -112,6 +113,7 @@ router.post('/addPayment', async (req, res) => {
   }
 });
 
+// buyyer callback
 router.get('/confirmPayment', async (req, res) => {
   console.log('confirm Payment');
   // const id = req.params.payment_intent_id;
@@ -136,6 +138,5 @@ router.get('/confirmPayment', async (req, res) => {
     res.status(500).json({ error: 'Error checking payment ID or it doenst exist' });
   }
 });
-
 
 module.exports = router;

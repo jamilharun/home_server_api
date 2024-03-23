@@ -4,6 +4,7 @@ const pool = require('../lib/postgres');
 const queries = require('./queries');
 const { generateUID } = require('../utils/genUid');
 const { generateToken } = require('../utils/auth');
+const sanity = require('../lib/sanity');
 
 
 const getOrders = async (req, res) => {
@@ -209,7 +210,33 @@ const setpickup = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+const removePickup = async (req, res) => {
+    console.log('remove from pickup');
+    const { checkoutid, shopRef } = req.body;
+    try {
+        // Remove the checkout ID from the pickup queue in Redis
+        redisClient.lrem(`pickup:${shopRef}`, 0, checkoutid, (err, result) => {
+            if (err) {
+                console.error('Error removing item from pickup:', err);
+                res.status(500).json({ error: 'Internal server error' });
+                return;
+            }
+            if (result === 0) {
+                console.log('Checkout ID not found in pickup queue');
+                res.status(404).json({ error: 'Checkout ID not found in pickup queue' });
+                return;
+            }
+            console.log('Item removed from pickup:', result);
+            res.status(200).json({ message: 'Item removed from pickup queue' });
+        });
+    } catch (error) {
+        console.error('Error removing item from pickup:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
 
+
+//buyyer
 //===================
 //redis
 
@@ -282,13 +309,387 @@ const getAllQueue = async (req, res) => {
     }
 };
 
+const getUserQueue = async (req, res) => {
+    console.log('get all queue');
+    const userId = req.params.id; // Fix the variable name
+    try {
+        const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE userRef = $1 AND isFinished = false", [userId]);
+        const queue = [];
+        
+        for (const data of unfinishedCheckouts.rows) {
+            let index = -1;
+            if (data.isSpecial) {
+                index = await redisClient.lindex(`queue:${data.shopRef}:special`, data.checkoutid);
+                if (index !== -1) {
+                    queue.push({ index });
+                } else {
+                    res.status(404).json({ error: 'Checkout ID not found in the special queue' });
+                    return; // Return to prevent further execution
+                }
+            } else {
+                const specialLength = await redisClient.llen(`queue:${data.shopRef}:special`);
+                const normalIndex = await redisClient.lindex(`queue:${data.shopRef}`, data.checkoutid);
+                if (normalIndex !== -1) {
+                    index = normalIndex + specialLength;
+                    queue.push({ index });
+                } else {
+                    res.status(404).json({ error: 'Checkout ID not found in the queue' });
+                    return; // Return to prevent further execution
+                }
+            }
+        }
+
+        res.status(200).json(queue);
+    } catch (error) {
+        console.error('Error retrieving queue:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
+//buyyer
+const checkPaySuccess = async (req, res) => {
+    console.log('checking if payment success');
+    const id = req.params.id;
+    console.log('id: ', id);
+  
+    try {
+      const query = `SELECT * FROM payment WHERE paymentId = $1`;
+      const values = [id];
+      const result = await pool.query(query, values);
+  
+      if (result.rows.length === 0) {
+        console.error('Payment not found');
+        return res.status(404).json({ error: 'Payment not found' });
+      }
+  
+      const paymentData = result.rows[0];
+      const isPaymentSuccessful = paymentData.paySuccess;
+  
+      if (isPaymentSuccessful) {
+        console.log('Payment successful');
+        return res.status(200).json({ message: 'Payment successful' });
+      } else {
+        console.log('Payment not successful yet');
+        return res.status(202).json({ message: 'Payment not successful yet' });
+      }
+    } catch (error) {
+      console.error('Error checking payment:', error);
+      return res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+// buyyer
+const userCheckout = async (req, res) => {
+    console.log('user queue');
+    const  userId  = req.params.id;
+    try {
+        // Fetch unfinished checkouts for the given userId
+        const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE userRef = $1 AND isFinished = false", [userId]);
+        
+        // Group data by checkoutId
+        const dataByCheckoutId = {};
+        
+        // Process each checkout
+        for (const checkout of unfinishedCheckouts.rows) {
+            const { checkOutId, groupNum, shopRef, userRef } = checkout;
+            
+            // Fetch cart based on groupNum
+            const cart = await fetchCartByGroupNum(groupNum);
+            const ItemRefs = await cart.map(cartd => cartd.itemRef)
+
+            // Fetch items for each cart
+            const items = await fetchItems(ItemRefs) // assuming this works
+            // Fetch shop details
+            const shopDetails = await fetchShopDetails(shopRef);
+            
+            // Fetch buyer user details
+            const buyerDetails = await fetchUserDetails(userRef);
+            
+            // Fetch shop owner details
+            const shopOwnerDetails = await fetchUserDetails(shopDetails.shopOwner);
+            
+            // Construct the data object for the checkout
+            const checkoutData = {
+                checkout,
+                cart,
+                items,
+                shopDetails,
+                buyerDetails,
+                shopOwnerDetails
+            };
+            
+            // Group the data by checkoutId
+            dataByCheckoutId[checkOutId] = checkoutData;
+        }
+        // Return the grouped data
+        res.status(200).json(dataByCheckoutId) 
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+    
+    // Implement functions to fetch data from Redis or other sources
+    async function fetchCartByGroupNum(groupNum) {
+        // Fetch cart based on groupNum
+        try {
+            // SQL query to fetch cart based on groupNum
+            const sqlQuery = 'SELECT * FROM "cart" WHERE groupNum = $1';
+            // Execute the query
+            const { rows } = await pool.query(sqlQuery, [groupNum]);      
+            return rows; // Return the fetched rows
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            throw error; // Rethrow the error for handling elsewhere
+        }
+    }
+
+    async function fetchItems(itemRefs) {
+        try {
+            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+            if (redisItems.every(item => item !== null)) {
+                return redisItems;
+            }
+    
+            const query = `*[_type == 'your_item_type' && _id in $itemRefs]`;
+            const params = { itemRefs };
+            const items = await sanity.fetch(query, params);
+    
+            if (items && items.length > 0) {
+                await Promise.all(items.map(item => redisClient.set(item._id, item)));
+                return items;
+            }
+    
+            return []; // No items found
+        } catch (error) {
+            console.error('Error fetching items:', error);
+            throw error;
+        }
+    }
+    
+    async function fetchShopDetails(shopRef) {
+        // Fetch shop details from Redis or Sanity.io based on shopRef
+        console.log('fetching shop details');
+        try {
+            const shopDetails = await redisClient.get(shopRef);
+            if (!shopDetails) {
+                console.log(`shop ${shopRef} not found in redis`);
+                const query = `*[_type == 'shop' && _id == $shopRef]`;
+                const params = { shopRef };
+                const fetchedShopDetails = await sanity.fetch(query, params);
+                if (fetchedShopDetails.length === 1) {
+                    await redisClient.set(fetchedShopDetails[0]._id, fetchedShopDetails[0]);
+                    console.log('fetching shop successful');
+                    return fetchedShopDetails[0];
+                } else {
+                    console.log('Shop not found in Sanity.io');
+                    return null;
+                }
+            } else {
+                console.log('fetching shop successful');
+                return shopDetails;
+            }
+        } catch (error) {
+            console.log('connection error', error);
+            throw error; // or handle the error as needed
+        }
+    }
+    
+    async function fetchUserDetails(userRef) {
+        try {
+          // 1. Attempt to fetch from Redis
+          const userData = await redisClient.get(`user:${userRef}`);
+          if (userData) {
+            return JSON.parse(userData);
+          }
+      
+          // 2. Fallback to PostgreSQL if Redis miss
+          const query = `SELECT * FROM users WHERE userid = $1`; // Adjust query based on your table structure
+          const params = [userRef];
+          const result = await pool.query(query, params);
+      
+          if (result.rows.length > 0) {
+            const user = result.rows[0];
+            // 3. Store data in Redis for future requests (optional)
+            await redisClient.set(`user:${userRef}`, JSON.stringify(user));
+            return user;
+          }
+      
+          return null; // Indicate data not found
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          throw error; // Rethrow the error for handling elsewhere
+        }
+    }
+      
+};
+
+//shop
+const shopCheckout = async (req, res) => {
+    console.log('shop queue');
+    const  shopid  = req.params.id;
+    try {
+        // Fetch unfinished checkouts for the given userId
+        const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE shopRef = $1 AND isFinished = false", [shopid]);
+        
+        // Group data by checkoutId
+        const dataByCheckoutId = {};
+        
+        // Process each checkout
+        for (const checkout of unfinishedCheckouts.rows) {
+            const { checkOutId, groupNum, shopRef, userRef } = checkout;
+            
+            // Fetch cart based on groupNum
+            const cart = await fetchCartByGroupNum(groupNum);
+            const ItemRefs = await cart.map(cartd => cartd.itemRef)
+
+            // Fetch items for each cart
+            const items = await fetchItems(ItemRefs) // assuming this works
+            // Fetch shop details
+            const shopDetails = await fetchShopDetails(shopRef);
+            
+            // Fetch buyer user details
+            const buyerDetails = await fetchUserDetails(userRef);
+            
+            // Fetch shop owner details
+            const shopOwnerDetails = await fetchUserDetails(shopDetails.shopOwner);
+            
+            // Construct the data object for the checkout
+            const checkoutData = {
+                checkout,
+                cart,
+                items,
+                shopDetails,
+                buyerDetails,
+                shopOwnerDetails
+            };
+            
+            // Group the data by checkoutId
+            dataByCheckoutId[checkOutId] = checkoutData;
+        }
+        // Return the grouped data
+        req.status(200).json(dataByCheckoutId) 
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+    
+    // Implement functions to fetch data from Redis or other sources
+    async function fetchCartByGroupNum(groupNum) {
+        // Fetch cart based on groupNum
+        try {
+            // SQL query to fetch cart based on groupNum
+            const sqlQuery = 'SELECT * FROM "cart" WHERE groupNum = $1';
+            // Execute the query
+            const { rows } = await pool.query(sqlQuery, [groupNum]);      
+            return rows; // Return the fetched rows
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            throw error; // Rethrow the error for handling elsewhere
+        }
+    }
+
+    async function fetchItems(itemRefs) {
+        try {
+            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+            if (redisItems.every(item => item !== null)) {
+                return redisItems;
+            }
+    
+            const query = `*[_type == 'your_item_type' && _id in $itemRefs]`;
+            const params = { itemRefs };
+            const items = await sanity.fetch(query, params);
+    
+            if (items && items.length > 0) {
+                await Promise.all(items.map(item => redisClient.set(item._id, item)));
+                return items;
+            }
+    
+            return []; // No items found
+        } catch (error) {
+            console.error('Error fetching items:', error);
+            throw error;
+        }
+    }
+    
+    async function fetchShopDetails(shopRef) {
+        // Fetch shop details from Redis or Sanity.io based on shopRef
+        console.log('fetching shop details');
+        try {
+            const shopDetails = await redisClient.get(shopRef);
+            if (!shopDetails) {
+                console.log(`shop ${shopRef} not found in redis`);
+                const query = `*[_type == 'shop' && _id == $shopRef]`;
+                const params = { shopRef };
+                const fetchedShopDetails = await sanity.fetch(query, params);
+                if (fetchedShopDetails.length === 1) {
+                    await redisClient.set(fetchedShopDetails[0]._id, fetchedShopDetails[0]);
+                    console.log('fetching shop successful');
+                    return fetchedShopDetails[0];
+                } else {
+                    console.log('Shop not found in Sanity.io');
+                    return null;
+                }
+            } else {
+                console.log('fetching shop successful');
+                return shopDetails;
+            }
+        } catch (error) {
+            console.log('connection error', error);
+            throw error; // or handle the error as needed
+        }
+    }
+    
+    async function fetchUserDetails(userRef) {
+        try {
+          // 1. Attempt to fetch from Redis
+          const userData = await redisClient.get(`user:${userRef}`);
+          if (userData) {
+            return JSON.parse(userData);
+          }
+      
+          // 2. Fallback to PostgreSQL if Redis miss
+          const query = `SELECT * FROM users WHERE userid = $1`; // Adjust query based on your table structure
+          const params = [userRef];
+          const result = await pool.query(query, params);
+      
+          if (result.rows.length > 0) {
+            const user = result.rows[0];
+            // 3. Store data in Redis for future requests (optional)
+            await redisClient.set(`user:${userRef}`, JSON.stringify(user));
+            return user;
+          }
+      
+          return null; // Indicate data not found
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          throw error; // Rethrow the error for handling elsewhere
+        }
+    }
+      
+};
+
+// const isFinished = async (req, res) => {
+//     console.log('order is finished');
+//     const {checkoutid, shopRef, userref, isFinished } = req.body;
+//     try {
+//         const queuePop = await redisClient.
+//     } catch (error) {
+        
+//     }
+// }
 
 module.exports = {
     //FETCH
     getOrders,      //data management
 
     getAllQueue,    //seller
+    getUserQueue, //buyyer
     getOrderDetails, //seller
+    checkPaySuccess, //buyyer
+
+    userCheckout,// buyyer
+    shopCheckout, //seller
 
     //CREATE
     createOrder,    //buyyer
@@ -300,4 +701,6 @@ module.exports = {
     //REDIS
     indexQueue,      //buyyer
     pickupListener,  //buyyer
+    removePickup,
+    
 };
