@@ -433,6 +433,7 @@ const userCheckout = async (req, res) => {
         for (const checkout of unfinishedCheckouts.rows) {
             const { checkOutId, groupNum, shopRef, userRef } = checkout;
             
+            console.log(checkOutId);
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupNum);
             const ItemRefs = await cart.map(cartd => cartd.itemRef)
@@ -543,7 +544,7 @@ const userCheckout = async (req, res) => {
           }
       
           // 2. Fallback to PostgreSQL if Redis miss
-          const query = `SELECT * FROM users WHERE userid = $1`; // Adjust query based on your table structure
+          const query = `SELECT * FROM "user" WHERE userid = $1`; // Adjust query based on your table structure
           const params = [userRef];
           const result = await pool.query(query, params);
       
@@ -658,9 +659,8 @@ const shopCheckout = async (req, res) => {
             const shopDetails = await redisClient.get(shopRef);
             if (!shopDetails) {
                 console.log(`shop ${shopRef} not found in redis`);
-                const query = `*[_type == 'shop' && _id == $shopRef]`;
-                const params = { shopRef };
-                const fetchedShopDetails = await sanity.fetch(query, params);
+                const query = `*[_type == 'shop' && _id == '${shopRef}']`;
+                const fetchedShopDetails = await sanity.fetch(query);
                 if (fetchedShopDetails.length === 1) {
                     await redisClient.set(fetchedShopDetails[0]._id, fetchedShopDetails[0]);
                     console.log('fetching shop successful');
@@ -688,7 +688,7 @@ const shopCheckout = async (req, res) => {
           }
       
           // 2. Fallback to PostgreSQL if Redis miss
-          const query = `SELECT * FROM users WHERE userid = $1`; // Adjust query based on your table structure
+          const query = `SELECT * FROM "user" WHERE userid = $1`; // Adjust query based on your table structure
           const params = [userRef];
           const result = await pool.query(query, params);
       
