@@ -527,23 +527,23 @@ const userCheckout = async (req, res) => {
         
         // Process each checkout
         for (const checkout of unfinishedCheckouts.rows) {
-            const { checkOutId, groupNum, shopRef, userRef } = checkout;
+            const { checkOutid, groupnum, shopref, userref } = checkout;
             
             // console.log(checkout
             // Fetch cart based on groupNum
-            const cart = await fetchCartByGroupNum(groupNum);
-            const ItemRefs = await cart.map(cartd => cartd.itemRef)
+            const cart = await fetchCartByGroupNum(groupnum);
+            const Itemrefs = await cart.map(cartd => cartd.itemref)
 
             // Fetch items for each cart
-            const items = await fetchItems(ItemRefs) // assuming this works
+            const items = await fetchItems(Itemrefs) // assuming this works
             // Fetch shop details
-            const shopDetails = await fetchShopDetails(shopRef);
+            const shopDetails = await fetchShopDetails(shopref);
             
             // Fetch buyer user details
-            const buyerDetails = await fetchUserDetails(userRef);
+            const buyerDetails = await fetchUserDetails(userref);
             
             // Fetch shop owner details
-            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopOwner);
+            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopowner);
             
             // Construct the data object for the checkout
             const checkoutData = {
@@ -556,7 +556,7 @@ const userCheckout = async (req, res) => {
             };
             console.log(checkoutData);
             // Group the data by checkoutId
-            dataByCheckoutId[checkOutId] = checkoutData;
+            dataByCheckoutId[checkOutid] = checkoutData;
         }
         // Return the grouped data
         res.status(200).json(dataByCheckoutId) 
