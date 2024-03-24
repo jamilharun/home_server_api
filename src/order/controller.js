@@ -422,52 +422,7 @@ const checkPaySuccess = async (req, res) => {
 const userCheckout = async (req, res) => {
     console.log('user queue');
     const  userId  = req.params.id;
-    try {
-        // Fetch unfinished checkouts for the given userId
-        const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE userRef = $1 AND isFinished = false", [userId]);
-        
-        // Group data by checkoutId
-        const dataByCheckoutId = {};
-        
-        // Process each checkout
-        for (const checkout of unfinishedCheckouts.rows) {
-            const { checkOutId, groupNum, shopRef, userRef } = checkout;
-            
-            // console.log(checkout
-            // Fetch cart based on groupNum
-            const cart = await fetchCartByGroupNum(groupNum);
-            const ItemRefs = await cart.map(cartd => cartd.itemRef)
-
-            // Fetch items for each cart
-            const items = await fetchItems(ItemRefs) // assuming this works
-            // Fetch shop details
-            const shopDetails = await fetchShopDetails(shopRef);
-            
-            // Fetch buyer user details
-            const buyerDetails = await fetchUserDetails(userRef);
-            
-            // Fetch shop owner details
-            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopOwner);
-            
-            // Construct the data object for the checkout
-            const checkoutData = {
-                checkout,
-                cart,
-                items,
-                shopDetails,
-                buyerDetails,
-                shopOwnerDetails
-            };
-            console.log(checkoutData);
-            // Group the data by checkoutId
-            dataByCheckoutId[checkOutId] = checkoutData;
-        }
-        // Return the grouped data
-        res.status(200).json(dataByCheckoutId) 
-    } catch (error) {
-        console.error('Error fetching data:', error);
-        throw error;
-    }
+    
     
     // Implement functions to fetch data from Redis or other sources
     async function fetchCartByGroupNum(groupNum) {
@@ -562,6 +517,53 @@ const userCheckout = async (req, res) => {
           throw error; // Rethrow the error for handling elsewhere
         }
     }
+
+    try {
+        // Fetch unfinished checkouts for the given userId
+        const unfinishedCheckouts = await pool.query('SELECT * FROM "checkout" WHERE userRef = $1 AND isFinished = false', [userId]);
+        
+        // Group data by checkoutId
+        const dataByCheckoutId = {};
+        
+        // Process each checkout
+        for (const checkout of unfinishedCheckouts.rows) {
+            const { checkOutId, groupNum, shopRef, userRef } = checkout;
+            
+            // console.log(checkout
+            // Fetch cart based on groupNum
+            const cart = await fetchCartByGroupNum(groupNum);
+            const ItemRefs = await cart.map(cartd => cartd.itemRef)
+
+            // Fetch items for each cart
+            const items = await fetchItems(ItemRefs) // assuming this works
+            // Fetch shop details
+            const shopDetails = await fetchShopDetails(shopRef);
+            
+            // Fetch buyer user details
+            const buyerDetails = await fetchUserDetails(userRef);
+            
+            // Fetch shop owner details
+            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopOwner);
+            
+            // Construct the data object for the checkout
+            const checkoutData = {
+                checkout,
+                cart,
+                items,
+                shopDetails,
+                buyerDetails,
+                shopOwnerDetails
+            };
+            console.log(checkoutData);
+            // Group the data by checkoutId
+            dataByCheckoutId[checkOutId] = checkoutData;
+        }
+        // Return the grouped data
+        res.status(200).json(dataByCheckoutId) 
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
       
 };
 
@@ -571,7 +573,7 @@ const shopCheckout = async (req, res) => {
     const  shopid  = req.params.id;
     try {
         // Fetch unfinished checkouts for the given userId
-        const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE shopRef = $1 AND isFinished = false", [shopid]);
+        const unfinishedCheckouts = await pool.query('SELECT * FROM "checkout" WHERE shopRef = $1 AND isFinished = false', [shopid]);
         
         // Group data by checkoutId
         const dataByCheckoutId = {};
