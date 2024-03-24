@@ -68,10 +68,10 @@ const createOrder = async (req, res) => {
     }
 
     console.log('create cart');
-    const { cartItem } = req.body;
-    console.log(cartItem);
+    const { cartItems } = req.body;
+    console.log(cartItems);
     try {
-        for (const items of cartItem) {
+        for (const items of cartItems) {
             const item = items[0];
             
             const itemRef = item._id;
