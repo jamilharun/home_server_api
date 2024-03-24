@@ -6,7 +6,7 @@ router = Router();
 
 require('dotenv').config({path: '.env.paymongo'});
 // (process.env.NODE_ENV_PAYMONGO_SECRET);
-const serverurl = 'http://localhost:3000/api/paymongo/confirmPayment';
+const serverurl = 'http://139.162.10.135:3000/api/paymongo/confirmPayment';
 
 router.post('/initializePay', async (req, res)=>{
   console.log('initialize pay');
