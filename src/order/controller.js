@@ -433,7 +433,7 @@ const userCheckout = async (req, res) => {
         for (const checkout of unfinishedCheckouts.rows) {
             const { checkOutId, groupNum, shopRef, userRef } = checkout;
             
-            console.log(checkOut);
+            console.log(checkout);
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupNum);
             const ItemRefs = await cart.map(cartd => cartd.itemRef)
