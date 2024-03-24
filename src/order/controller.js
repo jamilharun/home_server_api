@@ -726,7 +726,7 @@ module.exports = {
 
     //CREATE
     createOrder,    //buyyer
-    createCart,     //buyyer
+    // createCart,     //buyyer
 
     //UPDATE
     cancelOrder,    //buyyer
