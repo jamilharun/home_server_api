@@ -8,7 +8,7 @@ router.get('/order', controller.getOrders); //data management
 
 // router.get('/cart', controller.getCart); //data management
 
-router.post('/order/new', controller.createOrder, controller.createCart); //buyyer
+router.post('/order/new', controller.createOrder); //buyyer
 
 router.post('/order/cancel', controller.cancelOrder); //buyyers
 
@@ -26,7 +26,7 @@ router.post('/order/indexqueue', controller.indexQueue); //buyyers
 
 router.post('/order/pickuplistener', controller.pickupListener); //buyyer
 
-router.get('/order/isSuccess/:id', controller.checkPaySuccess)//buyyer
+router.get('/order/isSuccess/:id', controller.checkPaySuccess)//buyyer //payment
 
 // router.put('/order/isFinished', controller.isFinished) //buyyer
 

@@ -66,6 +66,39 @@ const createOrder = async (req, res) => {
         console.error('Error creating order:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+
+    console.log('create cart');
+    const { cartItem } = req.body;
+    console.log(cartItem);
+    try {
+        for (const items of cartItem) {
+            const item = items[0];
+            
+            const itemRef = item._id;
+            const quantity = items.length;
+            const price = item.price;
+            const subTotalPrice = quantity * price;
+            
+            const values = [groupNum, itemRef, quantity, price, subTotalPrice, created_at];
+
+            try {
+                const result = await pool.query(queries.createCart, values);
+                const outPut = result.rows[0]; // Assuming you want to return the first inserted row
+                console.log('outPut: ', outPut);
+                // You might want to collect all outputs and send them back after the loop completes
+            } catch (err) {
+                console.error('Error creating cart item:', err);
+                res.status(500).json({ error: err.message });
+                return; // Exit the function if an error occurs
+            }
+        }
+        // Send response after all cart items are inserted
+        res.status(201).json({ message: 'Cart items created successfully' });
+    } catch (error) {
+        // Handle errors
+        console.error('Error creating cart item:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 };
     
 
