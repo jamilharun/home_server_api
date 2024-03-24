@@ -32,6 +32,6 @@ router.get('/order/isSuccess/:id', controller.checkPaySuccess)//buyyer //payment
 
 router.get('/order/user/:id/checkout', controller.userCheckout) //buyyer
 
-router.get('/order/shop/:id/checkout', controller.shopCheckout)
+router.get('/order/shop/:id/checkout', controller.shopCheckout) //shoop
 
 module.exports = router;

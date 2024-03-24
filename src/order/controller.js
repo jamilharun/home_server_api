@@ -346,7 +346,7 @@ const getAllQueue = async (req, res) => {
 };
 
 const getUserQueue = async (req, res) => {
-    console.log('get all queue');
+    console.log('get iser queue');
     const userId = req.params.id; // Fix the variable name
     try {
         const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE userRef = $1 AND isFinished = false", [userId]);
