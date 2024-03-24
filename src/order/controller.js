@@ -447,7 +447,7 @@ const userCheckout = async (req, res) => {
             const buyerDetails = await fetchUserDetails(userRef);
             
             // Fetch shop owner details
-            const shopOwnerDetails = await fetchUserDetails(shopDetails.shopOwner);
+            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopOwner);
             
             // Construct the data object for the checkout
             const checkoutData = {
