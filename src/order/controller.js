@@ -513,9 +513,9 @@ const userCheckout = async (req, res) => {
             const shopDetails = await redisClient.get(shopRef);
             if (!shopDetails) {
                 console.log(`shop ${shopRef} not found in redis`);
-                const query = `*[_type == 'shop' && _id == '$shopRef']`;
-                const params = { shopRef };
-                const fetchedShopDetails = await sanity.fetch(query, params);
+                const query = `*[_type == 'shop' && _id == '${shopRef}']`;
+                // const params = { shopRef };
+                const fetchedShopDetails = await sanity.fetch(query);
                 if (fetchedShopDetails.length === 1) {
                     await redisClient.set(fetchedShopDetails[0]._id, fetchedShopDetails[0]);
                     console.log('fetching shop successful');
