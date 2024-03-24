@@ -355,7 +355,7 @@ const getUserQueue = async (req, res) => {
         for (const data of unfinishedCheckouts.rows) {
             let index = -1;
 
-            console.log(data);
+            // console.log(data);
             
             if (data.isSpecial) {
                 index = await redisClient.lindex(`queue:${data.shopRef}:special`, data.checkoutid);
