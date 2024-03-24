@@ -10,8 +10,8 @@ const createOrder = 'INSERT INTO "checkout" '+
 //buyyer
 const createCart =  'INSERT INTO "cart" '+
                     '(groupNum, itemRef, quantity, price, subTotalPrice, created_at) '+
-                    'VALUES '+
-                    '($1, $2, $3, $4, $5) RETURNING *';
+                    'VALUES ' +
+                    '($1, $2, $3, $4, $5, $6) RETURNING *';
 //buyyer
 const cancelOrder = 'UPDATE "checkout" ' +
                     'SET isCanceled = $1 ' +
