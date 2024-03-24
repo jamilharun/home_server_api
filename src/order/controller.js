@@ -31,7 +31,7 @@ const createOrder = async (req, res) => {
     console.log('create order');
     const { paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, 
             location, isSpecial, isFinished, created_at } = req.body;
-    const isCanceled = null; //default value upon create order
+    const isCanceled = false; //default value upon create order
 
     console.log(req.body);
     try {
@@ -346,7 +346,7 @@ const getAllQueue = async (req, res) => {
 };
 
 const getUserQueue = async (req, res) => {
-    console.log('get iser queue');
+    console.log('get user queue');
     const userId = req.params.id; // Fix the variable name
     try {
         const unfinishedCheckouts = await pool.query("SELECT * FROM checkout WHERE userRef = $1 AND isFinished = false", [userId]);
@@ -354,6 +354,9 @@ const getUserQueue = async (req, res) => {
         
         for (const data of unfinishedCheckouts.rows) {
             let index = -1;
+
+            console.log(data);
+            
             if (data.isSpecial) {
                 index = await redisClient.lindex(`queue:${data.shopRef}:special`, data.checkoutid);
                 if (index !== -1) {
@@ -366,7 +369,7 @@ const getUserQueue = async (req, res) => {
                 const specialLength = await redisClient.llen(`queue:${data.shopRef}:special`);
                 const normalIndex = await redisClient.lindex(`queue:${data.shopRef}`, data.checkoutid);
                 if (normalIndex !== -1) {
-                    index = normalIndex + specialLength;
+                    index = normalIndex ;
                     queue.push({ index });
                 } else {
                     res.status(404).json({ error: 'Checkout ID not found in the queue' });
