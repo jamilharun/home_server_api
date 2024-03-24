@@ -474,9 +474,10 @@ const userCheckout = async (req, res) => {
         // Fetch cart based on groupNum
         try {
             // SQL query to fetch cart based on groupNum
-            const sqlQuery = `SELECT * FROM "cart" WHERE groupNum = ${groupNum}`;
+            const sqlQuery = 'SELECT * FROM "cart" WHERE groupNum = $1';
             // Execute the query
-            const { rows } = await pool.query(sqlQuery);      
+            console.log(groupNum);
+            const { rows } = await pool.query(sqlQuery, [groupNum]);      
             return rows; // Return the fetched rows
         } catch (error) {
             console.error('Error fetching cart:', error);
