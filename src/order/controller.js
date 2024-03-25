@@ -442,14 +442,14 @@ const userCheckout = async (req, res) => {
 
     async function fetchItems(itemRefs) {
 
-        console.log('item reference: ', itemRefs);
+        // console.log('item reference: ', itemRefs);
         try {
             const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
             if (redisItems.every(item => item !== null)) {
                 return redisItems;
             }
-            console.log(`*[_type == 'your_item_type' && _id in '${itemRefs}']`);
-            const query = `*[_type == 'your_item_type' && _id in '${itemRefs}']`;
+            console.log(`*[_type == 'your_item_type' && _id in [${itemRefs}]]`);
+            const query = `*[_type == 'your_item_type' && _id in [${itemRefs}]]`;
             // const params = { itemRefs };
             const items = await sanity.fetch(query);
     
@@ -536,9 +536,9 @@ const userCheckout = async (req, res) => {
             // console.log(checkout
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
-            const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
+            const itemrefs = await Promise.all(cart.map(cartd => `${cartd.itemref}`))
             // Fetch items for each cart
-            console.log(itemrefs);
+            // console.log(itemrefs);
             const items = await fetchItems(itemrefs) // assuming this works
             // Fetch shop details
             const shopDetails = await fetchShopDetails(shopref);
