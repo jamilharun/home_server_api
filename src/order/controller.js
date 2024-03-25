@@ -645,9 +645,8 @@ const shopCheckout = async (req, res) => {
     async function fetchItems(itemRefs) {
         try {
             const redisItems = await Promise.all(itemRefs.map(itemRef => {redisClient.get(itemRef)}));
-            console.log(redisItems);
-            if (redisItems.some(item => item === null || item === undefined)) {
-                // Handle the case where at least one item is null or undefined
+            // console.log(redisItems);
+            if (redisItems) {
                 console.log(redisItems);
                 console.log('gonna fetch from sanity');
             } else {
