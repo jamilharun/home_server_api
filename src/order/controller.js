@@ -345,46 +345,78 @@ const getAllQueue = async (req, res) => {
     }
 };
 
-const getUserQueue = async (req, res) => {
-    console.log('get user queue');
-    const userId = req.params.id; // Fix the variable name
-    try {
-        const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
-        const queue = [];
-        // console.log(unfinishedCheckouts);
-        for (const data of unfinishedCheckouts.rows) {
-            let index = -1;
-            console.log(data); // Fix the variable name
-            if (data.isspecial) {
-                const queueKey = `queue:${data.shopref}:special`;
-                const queueLength = await redisClient.llen(queueKey);
-                const queueItems = await redisClient.lrange(queueKey, 0, -1);
-                index = queueItems.findIndex(item => item );
-            } else {
-                const queueKey = `queue:${data.shopref}`;
-                const queueLength = await redisClient.llen(queueKey);
-                const queueItems = await redisClient.lrange(queueKey, 0, -1);
-                console.log(queueItems);
-                index = queueItems.findIndex(item => item );
-            }
-            // console.log(index);
-            if (index !== -1) {
-                queue.push({ index });
-            } else {
-                res.status(404).json({ error: 'Checkout ID not found in the queue' });
-                return; // Return to prevent further execution
-            }
-        }
+// const getUserQueue = async (req, res) => {
+//     console.log('get user queue');
+//     const userId = req.params.id; // Fix the variable name
+//     try {
+//         const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+//         const queue = [];
+//         // console.log(unfinishedCheckouts);
+//         for (const data of unfinishedCheckouts.rows) {
+//             let index = -1;
+//             console.log(data); // Fix the variable name
+//             if (data.isspecial) {
+//                 const queueKey = `queue:${data.shopref}:special`;
+//                 const queueLength = await redisClient.llen(queueKey);
+//                 const queueItems = await redisClient.lrange(queueKey, 0, -1);
+//                 index = queueItems.findIndex(item => item );
+//             } else {
+//                 const queueKey = `queue:${data.shopref}`;
+//                 const queueLength = await redisClient.llen(queueKey);
+//                 const queueItems = await redisClient.lrange(queueKey, 0, -1);
+//                 // console.log(queueItems);
+//                 index = queueItemsqueueItems.findIndex(item => item );
+//             }
+//             // console.log(index);
+//             if (index !== -1) {
+//                 queue.push({ index });
+//             } else {
+//                 res.status(404).json({ error: 'Checkout ID not found in the queue' });
+//                 return; // Return to prevent further execution
+//             }
+//         }
 
-        res.status(200).json(queue);
-    } catch (error) {
-        console.error('Error retrieving queue:', error);
-        res.status(500).json({ error: 'Internal server error' });
-    }
-};
+//         res.status(200).json(queue);
+//     } catch (error) {
+//         console.error('Error retrieving queue:', error);
+//         res.status(500).json({ error: 'Internal server error' });
+//     }
+// };
 
 
 //buyyer
+
+const getUserQueue = async (req, res) => {
+    console.log('get user queue');
+    const userId = req.params.id; // Corrected variable name
+  
+    try {
+      const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+      const queue = [];
+  
+      for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
+        const queueKey = `queue:${checkout.shopref}${checkout.isspecial && ':special'}`; // Combine queue key logic
+  
+        // const queueLength = await redisClient.llen(queueKey);
+        const queueItems = await redisClient.lrange(queueKey, 0, -1);
+  
+        const matchingIndex = queueItems.findIndex(item => item); // Concise findIndex
+        if (matchingIndex !== -1) {
+          queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
+        } else {
+          res.status(404).json({ error: 'Checkout ID not found in the queue' });
+          return;
+        }
+      }
+  
+      res.status(200).json(queue);
+    } catch (error) {
+      console.error('Error retrieving queue:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+
 const checkPaySuccess = async (req, res) => {
     console.log('checking if payment success');
     const id = req.params.id;
