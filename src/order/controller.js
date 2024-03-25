@@ -644,24 +644,32 @@ const shopCheckout = async (req, res) => {
 
     async function fetchItems(itemRefs) {
         try {
-            const redisItems = await Promise.all(itemRefs.map(itemRef => {
-                console.log('itemRef: ', itemRef)
-                redisClient.get(itemRef)
-            }));
-            if (redisItems.every(item => item !== null || item !== undefined)) {
-                return redisItems;
+            const redisItems = await Promise.all(itemRefs.map(itemRef => {redisClient.get(itemRef)}));
+            console.log(redisItems);
+            if (redisItems.some(item => item === null || item === undefined)) {
+                // Handle the case where at least one item is null or undefined
+                console.log(redisItems);
+                console.log('gonna fetch from sanity');
+            } else {
+                console.log(redisItems);
+                console.log('gonna fetch from redis');
             }
+                
+            // }
+            // if (redisItems.every(item => item !== null || item !== undefined)) {
+            //     return redisItems;
+            // }
     
-            const query = `*[_id in [${itemRefs}]]`;
-            const items = await sanity.fetch(query, params);
+            // const query = `*[_id in [${itemRefs}]]`;
+            // const items = await sanity.fetch(query, params);
     
-            if (items && items.length > 0) {
-                await Promise.all(items.map(item => {
-                    redisClient.set(item._id, JSON.stringify(item))
-                    console.log(`${item._id} added to redis`);
-                }));
-                return items;
-            } 
+            // if (items && items.length > 0) {
+            //     await Promise.all(items.map(item => {
+            //         redisClient.set(item._id, JSON.stringify(item))
+            //         console.log(`${item._id} added to redis`);
+            //     }));
+            //     return items;
+            // } 
     
             return []; // No items found
         } catch (error) {
