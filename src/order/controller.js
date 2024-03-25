@@ -362,6 +362,7 @@ const getUserQueue = async (req, res) => {
                 index = queueItems.findIndex(item => item === data.checkoutid);
             } else {
                 const queueKey = `queue:${data.shopRef}`;
+                console.log(queueKey);
                 const queueLength = await redisClient.llen(queueKey);
                 const queueItems = await redisClient.lrange(queueKey, 0, -1);
                 console.log(queueItems);
