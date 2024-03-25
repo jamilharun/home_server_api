@@ -28,48 +28,11 @@ app.use("/api/postgres", userRoutes);
 app.use("/api/sanity", redisRoutes);
 app.use("/api/paymongo", pay)
 
-app.get('/', async (req, res) => {
-  const refs = ["015bd33a-5371-4d12-bb20-1ab8fd053d28","07d2115c-899c-4db1-a496-90b3491c1ac2"]
-  const result = await fetchItems(refs)
-  // Send the result as JSON response
-  res.json(result);
+
+app.get('/', (req, res) => {
+  res.send('Hello World!');
 });
 
-
-async function fetchItems(itemRefs) {
-  try {
-      const redisItems = await Promise.all(itemRefs.map(itemRef => {redisClient.get(itemRef)}));
-      // console.log(redisItems);
-      if (redisItems) {
-          console.log(redisItems);
-          console.log('gonna fetch from sanity');
-      } else {
-          console.log(redisItems);
-          console.log('gonna fetch from redis');
-      }
-          
-      // }
-      // if (redisItems.every(item => item !== null || item !== undefined)) {
-      //     return redisItems;
-      // }
-
-      // const query = `*[_id in [${itemRefs}]]`;
-      // const items = await sanity.fetch(query, params);
-
-      // if (items && items.length > 0) {
-      //     await Promise.all(items.map(item => {
-      //         redisClient.set(item._id, JSON.stringify(item))
-      //         console.log(`${item._id} added to redis`);
-      //     }));
-      //     return items;
-      // } 
-
-      return []; // No items found
-  } catch (error) {
-      console.error('Error fetching items:', error);
-      throw error;
-  }
-}
 
 //this is supposed to notify my when there are updated data in sanitydb
 // SSE endpoint

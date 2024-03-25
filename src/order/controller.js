@@ -440,38 +440,35 @@ const userCheckout = async (req, res) => {
         }
     }
 
-    async function fetchItems(itemRefs) {
 
-        // console.log('item reference: ', itemRefs);
+    async function fetchItems(itemRefs) {
+        console.log('fetching items');
         try {
-            const redisItems = await Promise.all(itemRefs.map(itemRef => {
-                console.log('itemRef: ', itemRef);
-                redisClient.get(itemRef)
-            }));
-            if (redisItems.every(item => item !== null)) {
-                console.log(' item found in Redis');
-                return redisItems;
+            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+      
+            if (redisItems.every(item => item !== null && item !== undefined)) {
+              console.log('redis items found');;
+              return redisItems
+            } else {
+              console.log('fetching in sanity');
+              const query = `*[_id in [${itemRefs.map(ref => `"${ref}"`).join(',')}]]`;
+              const items = await sanity.fetch(query);
+        
+              if (items && items.length > 0) {
+                  await Promise.all(items.map(item => {
+                      redisClient.set(item._id, JSON.stringify(item))
+                      console.log(`${item._id} added to redis`);
+                  }));
+                  return items;
+              }
             }
-            console.log(`*[ _id in [${itemRefs}]]`);
-            const query = `*[_id in [${itemRefs}]]`;
-            // const params = { itemRefs };
-            const items = await sanity.fetch(query);
-    
-            if (items && items.length > 0) {
-                await Promise.all(items.map(item => {
-                    redisClient.set(item._id, JSON.stringify(item))
-                    console.log(`${item._id} added to redis`);
-                }));
-                return items;
-            } 
-    
             return []; // No items found
         } catch (error) {
             console.error('Error fetching items:', error);
             throw error;
         }
     }
-    
+          
     async function fetchShopDetails(shopRef) {
         // Fetch shop details from Redis or Sanity.io based on shopRef
         console.log('fetching shop details');
