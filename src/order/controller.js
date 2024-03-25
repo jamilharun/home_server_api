@@ -446,6 +446,7 @@ const userCheckout = async (req, res) => {
         try {
             const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
             if (redisItems.every(item => item !== null)) {
+                console.log(' item found in Redis');
                 return redisItems;
             }
             console.log(`*[ _id in [${itemRefs}]]`);
@@ -534,7 +535,7 @@ const userCheckout = async (req, res) => {
         
         // Process each checkout
         for (const checkout of unfinishedCheckouts.rows) {
-            const { checkOutid, groupnum, shopref, userref } = checkout;
+            const { checkoutid, groupnum, shopref, userref } = checkout;
             
             console.log(checkout)
             // Fetch cart based on groupNum
@@ -563,7 +564,7 @@ const userCheckout = async (req, res) => {
             };
             console.log(checkoutData);
             // Group the data by checkoutId
-            dataByCheckoutId[checkOutid] = checkoutData;
+            dataByCheckoutId[checkoutid] = checkoutData;
         }
         // Return the grouped data
         res.status(200).json(dataByCheckoutId) 
@@ -614,7 +615,7 @@ const shopCheckout = async (req, res) => {
             };
             
             // Group the data by checkoutId
-            dataByCheckoutId[checkOutId] = checkoutData;
+            dataByCheckoutId[checkoutid] = checkoutData;
         }
         // Return the grouped data
         req.status(200).json(dataByCheckoutId) 
