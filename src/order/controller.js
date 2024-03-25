@@ -448,8 +448,8 @@ const userCheckout = async (req, res) => {
             if (redisItems.every(item => item !== null)) {
                 return redisItems;
             }
-            console.log(`*[_type == 'your_item_type' && _id in [${itemRefs}]]`);
-            const query = `*[_type == 'your_item_type' && _id in [${itemRefs}]]`;
+            console.log(`*[ _id in [${itemRefs}]]`);
+            const query = `*[_id in [${itemRefs}]]`;
             // const params = { itemRefs };
             const items = await sanity.fetch(query);
     
