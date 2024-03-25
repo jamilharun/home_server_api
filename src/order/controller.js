@@ -358,15 +358,16 @@ const getUserQueue = async (req, res) => {
             if (data.isSpecial) {
                 const queueKey = `queue:${data.shopRef}:special`;
                 const queueLength = await redisClient.llen(queueKey);
-                const queueItems = await redisClient.lrange(queueKey, 0, queueLength - 1);
+                const queueItems = await redisClient.lrange(queueKey, 0, -1);
                 index = queueItems.findIndex(item => item === data.checkoutid);
             } else {
                 const queueKey = `queue:${data.shopRef}`;
                 const queueLength = await redisClient.llen(queueKey);
-                const queueItems = await redisClient.lrange(queueKey, 0, queueLength - 1);
+                const queueItems = await redisClient.lrange(queueKey, 0, -1);
+                console.log(queueItems);
                 index = queueItems.findIndex(item => item === data.checkoutid);
             }
-
+            console.log(index);
             if (index !== -1) {
                 queue.push({ index });
             } else {
