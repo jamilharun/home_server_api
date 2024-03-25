@@ -50,7 +50,7 @@ module.exports = {
     getUserOrder, //buyyer
     orderDetail, //seller
     cartItems, //seller
-
+    getShopOrder, //seller
     //CREATE
     createOrder, //buyyer
     createCart, //buyyer
