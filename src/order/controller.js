@@ -470,6 +470,7 @@ const userCheckout = async (req, res) => {
         console.log('fetching shop details');
         try {
             const shopDetails = await redisClient.get(shopRef);
+            
             if (!shopDetails) {
                 console.log(`shop ${shopRef} not found in redis`);
                 const query = `*[_type == 'shop' && _id == '${shopRef}']`;
@@ -535,8 +536,9 @@ const userCheckout = async (req, res) => {
             // console.log(checkout
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
-            const itemrefs = await cart.map(cartd => cartd.itemref)
+            const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
             // Fetch items for each cart
+            console.log(itemrefs);
             const items = await fetchItems(itemrefs) // assuming this works
             // Fetch shop details
             const shopDetails = await fetchShopDetails(shopref);
