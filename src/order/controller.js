@@ -395,8 +395,9 @@ const getUserQueue = async (req, res) => {
       const queue = [];
   
       for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
+        console.log(checkout);
         const queueKey = `queue:${checkout.shopref}${checkout.isspecial && ':special'}`; // Combine queue key logic
-  
+        console.log(queueKey);
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         console.log('all queue',queueItems);
