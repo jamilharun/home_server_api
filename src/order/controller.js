@@ -441,22 +441,24 @@ const userCheckout = async (req, res) => {
     }
 
     async function fetchItems(itemRefs) {
+
+        console.log('item reference: ', itemRefs);
         try {
             const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
             if (redisItems.every(item => item !== null)) {
                 return redisItems;
             }
-    
-            const query = `*[_type == 'your_item_type' && _id in $itemRefs]`;
-            const params = { itemRefs };
-            const items = await sanity.fetch(query, params);
+            console.log(`*[_type == 'your_item_type' && _id in '${itemRefs}']`);
+            const query = `*[_type == 'your_item_type' && _id in '${itemRefs}']`;
+            // const params = { itemRefs };
+            const items = await sanity.fetch(query);
     
             if (items && items.length > 0) {
                 await Promise.all(items.map(item => redisClient.set(item._id, item)));
                 return items;
-            }
+            } 
     
-            return []; // No items found
+            // return []; // No items found
         } catch (error) {
             console.error('Error fetching items:', error);
             throw error;
@@ -492,6 +494,7 @@ const userCheckout = async (req, res) => {
     }
     
     async function fetchUserDetails(userRef) {
+        console.log(userRef);
         try {
           // 1. Attempt to fetch from Redis
           const userData = await redisClient.get(`user:${userRef}`);
@@ -532,17 +535,16 @@ const userCheckout = async (req, res) => {
             // console.log(checkout
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
-            const Itemrefs = await cart.map(cartd => cartd.itemref)
-
+            const itemrefs = await cart.map(cartd => cartd.itemref)
             // Fetch items for each cart
-            const items = await fetchItems(Itemrefs) // assuming this works
+            const items = await fetchItems(itemrefs) // assuming this works
             // Fetch shop details
             const shopDetails = await fetchShopDetails(shopref);
             
             // Fetch buyer user details
             const buyerDetails = await fetchUserDetails(userref);
             
-            // Fetch shop owner details
+            // Fetch shop owner details //im not sure if this is important
             const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopowner);
             
             // Construct the data object for the checkout
