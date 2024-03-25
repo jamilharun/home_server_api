@@ -351,7 +351,7 @@ const getUserQueue = async (req, res) => {
     try {
         const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
         const queue = [];
-        console.log(unfinishedCheckouts);
+        // console.log(unfinishedCheckouts);
         for (const data of unfinishedCheckouts.rows) {
             let index = -1;
             console.log(data.shopRef);
