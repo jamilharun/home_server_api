@@ -536,7 +536,7 @@ const userCheckout = async (req, res) => {
             // console.log(checkout
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
-            const itemrefs = await Promise.all(cart.map(cartd => `${cartd.itemref}`))
+            const itemrefs = await Promise.all(cart.map(cartd => `"${cartd.itemref}"`))
             // Fetch items for each cart
             // console.log(itemrefs);
             const items = await fetchItems(itemrefs) // assuming this works
