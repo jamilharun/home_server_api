@@ -648,7 +648,7 @@ const shopCheckout = async (req, res) => {
                 console.log('itemRef: ', itemRef)
                 redisClient.get(itemRef)
             }));
-            if (redisItems.every(item => item !== null)) {
+            if (redisItems.every(item => item !== null || item !== undefined)) {
                 return redisItems;
             }
     
