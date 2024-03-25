@@ -444,7 +444,10 @@ const userCheckout = async (req, res) => {
 
         // console.log('item reference: ', itemRefs);
         try {
-            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+            const redisItems = await Promise.all(itemRefs.map(itemRef => {
+                console.log('itemRef: ', itemRef);
+                redisClient.get(itemRef)
+            }));
             if (redisItems.every(item => item !== null)) {
                 console.log(' item found in Redis');
                 return redisItems;
@@ -456,7 +459,7 @@ const userCheckout = async (req, res) => {
     
             if (items && items.length > 0) {
                 await Promise.all(items.map(item => {
-                    redisClient.set(item._id, item)
+                    redisClient.set(item._id, JSON.stringify(item))
                     console.log(`${item._id} added to redis`);
                 }));
                 return items;
@@ -641,7 +644,10 @@ const shopCheckout = async (req, res) => {
 
     async function fetchItems(itemRefs) {
         try {
-            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+            const redisItems = await Promise.all(itemRefs.map(itemRef => {
+                console.log('itemRef: ', itemRef)
+                redisClient.get(itemRef)
+            }));
             if (redisItems.every(item => item !== null)) {
                 return redisItems;
             }
@@ -651,7 +657,7 @@ const shopCheckout = async (req, res) => {
     
             if (items && items.length > 0) {
                 await Promise.all(items.map(item => {
-                    redisClient.set(item._id, item)
+                    redisClient.set(item._id, JSON.stringify(item))
                     console.log(`${item._id} added to redis`);
                 }));
                 return items;
