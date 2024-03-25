@@ -399,7 +399,7 @@ const getUserQueue = async (req, res) => {
   
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
-  
+        console.log('all queue',queueItems);
         const matchingIndex = queueItems.findIndex(item => item); // Concise findIndex
         if (matchingIndex !== -1) {
           queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
@@ -408,7 +408,7 @@ const getUserQueue = async (req, res) => {
           return;
         }
       }
-  
+      console.log('res: ',queue);
       res.status(200).json(queue);
     } catch (error) {
       console.error('Error retrieving queue:', error);
