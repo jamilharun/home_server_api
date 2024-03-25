@@ -35,7 +35,15 @@ const getUserOrder= 'SELECT c.*, p.* ' +
                     'WHERE p.paySuccess = TRUE AND ' + 
                     'c.isCanceled = FALSE AND' + 
                     'c.isFinished = FALSE AND' + 
-                    'c.userRef = $1;' 
+                    'c.userRef = $1;'
+//seller
+const getShopOrder= 'SELECT c.*, p.* ' +
+                    'FROM checkout c ' +
+                    'JOIN payment p ON c.paymentRef = p.paymentId ' +
+                    'WHERE p.paySuccess = TRUE AND ' + 
+                    'c.isCanceled = FALSE AND' + 
+                    'c.isFinished = FALSE AND' + 
+                    'c.shopRef = $1;' 
 module.exports = {
     //FETCH
     getOrders, //data management
