@@ -761,6 +761,59 @@ const shopCheckout = async (req, res) => {
       
 };
 
+const getUserData = async (userId) => {
+    try {
+        const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+        const dataByCheckoutId = {};
+
+        for (const checkout of unfinishedCheckouts.rows) {
+            const { checkoutid, groupnum, shopref, userref, isspecial } = checkout;
+            const cart = await fetchCartByGroupNum(groupnum);
+            const itemRefs = await Promise.all(cart.map(cartItem => cartItem.itemref));
+            const items = await fetchItems(itemRefs);
+            const shopDetails = await fetchShopDetails(shopref);
+            const buyerDetails = await fetchUserDetails(userref);
+            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopowner);
+
+            const queueKey = `queue:${shopref}${isspecial ? ':special' : ''}`;
+            const queueItems = await redisClient.lrange(queueKey, 0, -1);
+            const matchingIndex = queueItems.findIndex(item => item === checkoutid);
+
+            if (matchingIndex !== -1) {
+                const checkoutData = {
+                    checkout,
+                    cart,
+                    items,
+                    shopDetails,
+                    buyerDetails,
+                    shopOwnerDetails,
+                    queueIndex: matchingIndex
+                };
+                dataByCheckoutId[checkoutid] = checkoutData;
+            } else {
+                throw new Error('Checkout ID not found in the queue');
+            }
+        }
+
+        return dataByCheckoutId;
+    } catch (error) {
+        console.error('Error fetching user data:', error);
+        throw error;
+    }
+};
+
+const userCheckoutAndQueue = async (req, res) => {
+    const userId = req.params.id;
+
+    try {
+        const userData = await getUserData(userId);
+        res.status(200).json(userData);
+    } catch (error) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+
 // const isFinished = async (req, res) => {
 //     console.log('order is finished');
 //     const {checkoutid, shopRef, userref, isFinished } = req.body;
@@ -779,7 +832,7 @@ module.exports = {
     getUserQueue, //buyyer
     getOrderDetails, //seller
     checkPaySuccess, //buyyer
-
+    userCheckoutAndQueue, //buyyer
     userCheckout,// buyyer
     shopCheckout, //seller
 

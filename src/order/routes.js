@@ -34,4 +34,7 @@ router.get('/order/user/:id/checkout', controller.userCheckout) //buyyer //finis
 
 router.get('/order/shop/:id/checkout', controller.shopCheckout) //shoop
 
+//dfdsfsdf
+router.get('/order/usercheckoutandqueue/:id', controller.userCheckoutAndQueue) //buyyer
+
 module.exports = router;
