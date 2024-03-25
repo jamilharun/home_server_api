@@ -20,7 +20,7 @@ router.post('/order/removeFromPickup', controller.removePickup); //buyyer //when
 
 router.get('/order/shop/:id/queue', controller.getAllQueue); //seller
 
-router.get('/order/user/:id/queue', controller.getUserQueue); //buyyer
+router.get('/order/user/:id/queue', controller.getUserQueue); //buyyer //finished
 
 router.post('/order/indexqueue', controller.indexQueue); //buyyers
 
@@ -30,7 +30,7 @@ router.get('/order/isSuccess/:id', controller.checkPaySuccess)//buyyer //payment
 
 // router.put('/order/isFinished', controller.isFinished) //buyyer
 
-router.get('/order/user/:id/checkout', controller.userCheckout) //buyyer
+router.get('/order/user/:id/checkout', controller.userCheckout) //buyyer //finished
 
 router.get('/order/shop/:id/checkout', controller.shopCheckout) //shoop
 

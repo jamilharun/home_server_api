@@ -28,10 +28,18 @@ const cartItems   = 'SELECT * ' +
 const isFinished  = 'UPDATE "checkOut" ' +
                     'SET isFinished = $1 ' +
                     'WHERE checkOutId = $2'
+//buyyer
+const getUserOrder= 'SELECT c.*, p.* ' +
+                    'FROM checkout c ' +
+                    'JOIN payment p ON c.paymentRef = p.paymentId ' +
+                    'WHERE p.paySuccess = TRUE AND ' + 
+                    'c.isCanceled = FALSE AND' + 
+                    'c.isFinished = FALSE AND' + 
+                    'c.userRef = $1;' 
 module.exports = {
     //FETCH
     getOrders, //data management
-    
+    getUserOrder, //buyyer
     orderDetail, //seller
     cartItems, //seller
 
