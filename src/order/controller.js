@@ -403,11 +403,19 @@ const getUserQueue = async (req, res) => {
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         console.log('all queue',queueItems);
-                
-        // Get the index of checkoutid in queueItems
-        const matchingIndex = queueItems.indexOf(checkout.checkoutid);
+        
+        let matchingIndex = -1;
             
+        // Use a for...of loop to iterate over array elements
+        for (const [index, item] of queueItems.entries()) {
+            if (item === checkout.checkoutid) {
+                matchingIndex = index;
+                break;
+            }
+        }
+        
         console.log(matchingIndex);
+
         // const matchingIndex = queueItems.indexOf(checkout.checkoutid); // Concise findIndex
         if (matchingIndex !== -1) {
           queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
