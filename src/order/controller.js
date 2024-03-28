@@ -392,16 +392,27 @@ const getUserQueue = async (req, res) => {
   
     try {
       const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+          
       const queue = [];
   
       for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
         console.log(checkout);
         const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
+          
         console.log(queueKey);
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         console.log('all queue',queueItems);
-        const matchingIndex = queueItems.findIndex(item => item); // Concise findIndex
+        
+        let matchingIndex = -1;
+        
+        for (const key in queueItems) {
+            if (queueItems.hasOwnProperty(key) && queueItems[key] === checkout.checkoutid) {
+                matchingIndex = parseInt(key);
+                break;
+            }
+        }
+        // const matchingIndex = queueItems.indexOf(checkout.checkoutid); // Concise findIndex
         if (matchingIndex !== -1) {
           queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
         } else {
