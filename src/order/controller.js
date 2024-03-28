@@ -412,6 +412,7 @@ const getUserQueue = async (req, res) => {
                 break;
             }
         }
+        console.log(matchingIndex);
         // const matchingIndex = queueItems.indexOf(checkout.checkoutid); // Concise findIndex
         if (matchingIndex !== -1) {
           queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
