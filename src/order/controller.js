@@ -396,9 +396,8 @@ const getUserQueue = async (req, res) => {
       const queue = [];
   
       for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
-        let coid = checkout.checkoutid
         
-        console.log(coid);
+        console.log(checkout);
         const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
           
         console.log(queueKey);
@@ -410,7 +409,7 @@ const getUserQueue = async (req, res) => {
 
         // Use a for...of loop to iterate over array elements
         for (const [index, item] of queueItems.entries()) {
-            if (item === coid) {
+            if (item === JSON.stringify(checkout.checkoutid)) {
                 matchingIndex = index;
                 break;
             }
