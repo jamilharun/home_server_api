@@ -403,15 +403,10 @@ const getUserQueue = async (req, res) => {
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         console.log('all queue',queueItems);
-        
-        let matchingIndex = -1;
-        
-        for (const key in queueItems) {
-            if (queueItems.hasOwnProperty(key) && queueItems[key] === checkout.checkoutid) {
-                matchingIndex = parseInt(key);
-                break;
-            }
-        }
+                
+        // Get the index of checkoutid in queueItems
+        const matchingIndex = queueItems.indexOf(checkout.checkoutid);
+            
         console.log(matchingIndex);
         // const matchingIndex = queueItems.indexOf(checkout.checkoutid); // Concise findIndex
         if (matchingIndex !== -1) {
