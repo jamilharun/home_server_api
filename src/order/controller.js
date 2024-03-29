@@ -438,6 +438,10 @@ const getUserQueue = async (req, res) => {
           return;
         }
       }
+      console.log('classic', queueClassic);
+      console.log('special', queueSpecial);
+      console.log('all', queueAll);
+      
       console.log('res: ',queue);
       res.status(200).json(queue);
     } catch (error) {
