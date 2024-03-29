@@ -411,12 +411,9 @@ const getUserQueue = async (req, res) => {
       for (const value of queueClassic) {queueAll.push(value)}
   
       for (const value of queueAll){
-        const checkoutData = unfinishedCheckouts.map(data=>{
-            if (data.checkoutid === value) {
-                return data.checkoutid
-            }
-        })
-
+        const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
+        console.log(checkoutData);
+        
         const queueKey = `queue:${checkoutData.shopref}${checkoutData.isspecial ? ':special' : ''}`; // Combine queue key logic
           
         console.log(queueKey);
