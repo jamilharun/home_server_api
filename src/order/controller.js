@@ -423,14 +423,14 @@ const getUserQueue = async (req, res) => {
         let matchingIndex = -1;
         
         // Use a for...of loop to iterate over array elements
-        for (const [index, item] of queueItems.entries()) {
-            for (const value of queueAll){
+        for (const value of queueAll){
+            for (const [index, item] of queueItems.entries()) {
                 if (item === JSON.stringify(value)) {
                     matchingIndex = index;
                     break;
                 }
-            }            
-        }
+            }
+        }            
         if (matchingIndex !== -1) {
           queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
         } else {
