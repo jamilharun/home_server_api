@@ -34,11 +34,15 @@ const createOrder = async (req, res) => {
     const isCanceled = false; //default value upon create order
 
     console.log(req.body);
+
+    const returndata = '';
+
     try {
         const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, 
                         totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
         const result = await pool.query(queries.createOrder, values);
         const outPut = result.rows[0]; // Assuming you want to return the first inserted row
+        returndata = outPut;
         console.log('outPut: ', outPut);
         if (isSpecial) {
             redisClient.rpush(`queue:${shopRef}:special`, JSON.stringify(outPut.checkoutid), (err, result) => {
@@ -96,12 +100,14 @@ const createOrder = async (req, res) => {
             }
         }
         // Send response after all cart items are inserted
-        res.status(201).json({ message: 'Cart items created successfully' });
+        res.status(201).json(returndata)
+        // res.status(201).json({ message: 'Cart items created successfully' });
     } catch (error) {
         // Handle errors
         console.error('Error creating cart item:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
+    
 };
     
 
@@ -576,7 +582,7 @@ const userCheckout = async (req, res) => {
                 // const params = { shopRef };
                 const fetchedShopDetails = await sanity.fetch(query);
                 if (fetchedShopDetails.length === 1) {
-                    await redisClient.set(fetchedShopDetails[0]._id, fetchedShopDetails[0]);
+                    await redisClient.set(fetchedShopDetails[0]._id, fetchedShopDetails);
                     console.log('fetching shop successful');
                     return fetchedShopDetails[0];
                 } else {
@@ -774,6 +780,7 @@ const shopCheckout = async (req, res) => {
         console.log('fetching shop details');
         try {
             const shopDetails = await redisClient.get(shopRef);
+            console.log(shopDetails);
             if (!shopDetails) {
                 console.log(`shop ${shopRef} not found in redis`);
                 const query = `*[_type == 'shop' && _id == '${shopRef}']`;
