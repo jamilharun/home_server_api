@@ -400,7 +400,7 @@ const getUserQueue = async (req, res) => {
 
       for (const checkout of unfinishedCheckouts.rows) {
         //sort queue type 
-        if (checkout.isSpecial) {
+        if (checkout.isspecial) {
             queueSpecial.push(checkout.checkoutid);    
         } else {
             queueClassic.push(checkout.checkoutid);
@@ -411,13 +411,13 @@ const getUserQueue = async (req, res) => {
       for (const value of queueClassic) {queueAll.push(value)}
   
       for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
-        console.log(checkout);
+        // console.log(checkout);
         const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
           
         console.log(queueKey);
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
-        console.log('all queue',queueItems);
+        console.log(`all queue ${checkout.isspecial ? ':special' : ''}`,queueItems);
         
 
         let matchingIndex = -1;
@@ -441,7 +441,7 @@ const getUserQueue = async (req, res) => {
       console.log('classic', queueClassic);
       console.log('special', queueSpecial);
       console.log('all', queueAll);
-      
+
       console.log('res: ',queue);
       res.status(200).json(queue);
     } catch (error) {
