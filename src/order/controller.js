@@ -585,7 +585,7 @@ const userCheckout = async (req, res) => {
                 if (fetchedShopDetails.length === 1) {
                     const objstring = JSON.stringify(fetchedShopDetails)
                     const stringjson = JSON.parse(objstring)
-                    await redisClient.set(fetchedShopDetails[0]._id, JSON.parse(stringjson));
+                    await redisClient.set(fetchedShopDetails[0]._id, JSON.stringify(stringjson));
                     console.log('fetching shop successful');
                     return fetchedShopDetails[0];
                 } else {
