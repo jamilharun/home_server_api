@@ -394,9 +394,23 @@ const getUserQueue = async (req, res) => {
       const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
           
       const queue = [];
+      const queueSpecial = [];
+      const queueClassic = [];
+      const queueAll = [];
+
+      for (const checkout of unfinishedCheckouts.rows) {
+        //sort queue type 
+        if (checkout.isSpecial) {
+            queueSpecial.push(checkout.checkoutid);    
+        } else {
+            queueClassic.push(checkout.checkoutid);
+        }
+      }
+
+      for (const value  of queueSpecial) {queueAll.push(value)}
+      for (const value of queueClassic) {queueAll.push(value)}
   
       for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
-        
         console.log(checkout);
         const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
           
@@ -405,23 +419,22 @@ const getUserQueue = async (req, res) => {
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         console.log('all queue',queueItems);
         
-        let matchingIndex = -1;
 
+        let matchingIndex = -1;
+        
         // Use a for...of loop to iterate over array elements
         for (const [index, item] of queueItems.entries()) {
-            if (item === JSON.stringify(checkout.checkoutid)) {
-                matchingIndex = index;
-                break;
-            }
+            for (const value of queueAll){
+                if (item === JSON.stringify(value)) {
+                    matchingIndex = index;
+                    break;
+                }
+            }            
         }
-
-        console.log(matchingIndex);
-
-        // const matchingIndex = queueItems.indexOf(checkout.checkoutid); // Concise findIndex
         if (matchingIndex !== -1) {
           queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
         } else {
-          res.status(404).json({ error: 'Checkout ID not found in the queue' });
+          res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
           return;
         }
       }
