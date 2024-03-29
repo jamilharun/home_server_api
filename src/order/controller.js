@@ -413,17 +413,26 @@ const getUserQueue = async (req, res) => {
       for (const value of queueAll){
         const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
         console.log(checkoutData);
-        
-        const queueKey = `queue:${checkoutData.shopref}${checkoutData.isspecial ? ':special' : ''}`; // Combine queue key logic
-          
-        console.log(queueKey);
-        // const queueLength = await redisClient.llen(queueKey);
+
+        const globalQueue = []
+
+        const queueKeySpecial = `queue:${checkoutData.shopref}:special`; // Combine queue key logic
+        const queueKey = `queue:${checkoutData.shopref}`;
+
+        const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
-        console.log(`all queue ${checkoutData.isspecial ? ':special' : ''}`,queueItems);
         
+        for (const value of queueItemsSpecial) {
+            globalQueue.push(value);
+        }
+        for (const value of queueItems) {
+            globalQueue.push(value)
+        }
+
+        console.log('globalqueue', globalQueue);
         let matchingIndex = -1;
 
-        for (const [index, item] of queueItems.entries()) {
+        for (const [index, item] of globalQueue.entries()) {
             if (item === JSON.stringify(value)) {
                 matchingIndex = index;
                 break;
@@ -463,7 +472,7 @@ const getUserQueue = async (req, res) => {
       console.log('classic', queueClassic);
       console.log('special', queueSpecial);
       console.log('all', queueAll);
-
+      
       console.log('res: ',queue);
       res.status(200).json(queue);
     } catch (error) {
