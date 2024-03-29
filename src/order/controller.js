@@ -583,9 +583,9 @@ const userCheckout = async (req, res) => {
                 const fetchedShopDetails = await sanity.fetch(query);
                 console.log(fetchedShopDetails);
                 if (fetchedShopDetails.length === 1) {
-                    const objjson = JSON.stringify(fetchedShopDetails)
-                    console.log(objjson);
-                    await redisClient.set(fetchedShopDetails[0]._id, objjson);
+                    const objstring = JSON.stringify(fetchedShopDetails)
+                    const stringjson = JSON.parse(objstring)
+                    await redisClient.set(fetchedShopDetails[0]._id, stringjson);
                     console.log('fetching shop successful');
                     return fetchedShopDetails[0];
                 } else {
