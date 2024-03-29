@@ -1,7 +1,6 @@
 //data management
 const getOrders   = 'SELECT * ' + 
                     'FROM "checkout";';
-
 //buyyer
 const createOrder = 'INSERT INTO "checkout" '+ 
                     '(paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalamount, location, isSpecial, isCanceled, isFinished, created_at) ' +
@@ -44,6 +43,12 @@ const getShopOrder=`SELECT c.*, p.*
                     c.isCanceled = FALSE AND  
                     c.isFinished = FALSE AND  
                     c.shopRef = $1; `
+// //buyyer //queue
+// const getCheckoutId='SELECT * ' + 
+//                     'FROM "checkout" ' +
+//                     'WHERE checkOutId = $1'
+
+
 module.exports = {
     //FETCH
     getOrders, //data management
@@ -51,6 +56,7 @@ module.exports = {
     orderDetail, //seller
     cartItems, //seller
     getShopOrder, //seller
+    // getCheckoutId, //buyyer //queue
     //CREATE
     createOrder, //buyyer
     createCart, //buyyer

@@ -410,34 +410,59 @@ const getUserQueue = async (req, res) => {
       for (const value  of queueSpecial) {queueAll.push(value)}
       for (const value of queueClassic) {queueAll.push(value)}
   
-      for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
-        // console.log(checkout);
-        const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
+      for (const value of queueAll){
+        const checkoutData = unfinishedCheckouts.map(data=>{
+            if (data.checkoutid === value) {
+                return data.checkoutid
+            }
+        })
+
+        const queueKey = `queue:${checkoutData.shopref}${checkoutData.isspecial ? ':special' : ''}`; // Combine queue key logic
           
         console.log(queueKey);
         // const queueLength = await redisClient.llen(queueKey);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
-        console.log(`all queue ${checkout.isspecial ? ':special' : ''}`,queueItems);
+        console.log(`all queue ${checkoutData.isspecial ? ':special' : ''}`,queueItems);
+        
+        let matchingIndex = -1;
+
+        for (const [index, item] of queueItems.entries()) {
+            if (item === JSON.stringify(value)) {
+                matchingIndex = index;
+                break;
+            }
+        }
+
+        if (matchingIndex !== -1) {
+            queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+        } else {
+            res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
+            return;
+        }
+    }
+    //   for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
+    //     // console.log(checkout);
+    //     const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
+          
+    //     console.log(queueKey);
+    //     // const queueLength = await redisClient.llen(queueKey);
+    //     const queueItems = await redisClient.lrange(queueKey, 0, -1);
+    //     console.log(`all queue ${checkout.isspecial ? ':special' : ''}`,queueItems);
         
 
-        let matchingIndex = -1;
+    //     let matchingIndex = -1;
         
-        // Use a for...of loop to iterate over array elements
-        for (const value of queueAll){
-            for (const [index, item] of queueItems.entries()) {
-                if (item === JSON.stringify(value)) {
-                    matchingIndex = index;
-                    break;
-                }
-            }
-        }            
-        if (matchingIndex !== -1) {
-          queue.push({ index: matchingIndex, data: checkout.checkoutid }); // Include both index and data
-        } else {
-          res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
-          return;
-        }
-      }
+    //     // Use a for...of loop to iterate over array elements
+    //     for (const value of queueAll){
+    //         for (const [index, item] of queueItems.entries()) {
+    //             if (item === JSON.stringify(value)) {
+    //                 matchingIndex = index;
+    //                 break;
+    //             }
+    //         }
+    //     }            
+        
+    //   }
       console.log('classic', queueClassic);
       console.log('special', queueSpecial);
       console.log('all', queueAll);
