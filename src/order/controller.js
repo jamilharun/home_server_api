@@ -1035,7 +1035,7 @@ const userNewCheckout = async (req, res) => {
     }
 };
 
-const usernewQueue = async () => {
+const usernewQueue = async (req, res) => {
     console.log('get new user queue');
     const  {checkoutid, shopref, isspecial}  = req.body;
     try {
