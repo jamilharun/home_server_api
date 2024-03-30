@@ -347,7 +347,7 @@ const getAllQueue = async (req, res) => {
         for (const value of queueClassic) {
             allQueue.push(value)
         }
-        
+        console.log(allQueue);
         res.status(200).json(allQueue);
     } catch (error) {
         console.error('Error retrieving queue:', error);
