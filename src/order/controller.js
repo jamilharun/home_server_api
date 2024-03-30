@@ -336,14 +336,18 @@ const getAllQueue = async (req, res) => {
     console.log('get all queue');
     const  shopRef  = req.params.id;
     try {
+        const allQueue = []
+
         const queueSpecial = await redisClient.lrange(`queue:${shopRef}:special`, 0, -1);
-        const queue = await redisClient.lrange(`queue:${shopRef}`, 0, -1);
+        const queueClassic = await redisClient.lrange(`queue:${shopRef}`, 0, -1);
 
-        const allQueue = {
-            queueSpecial,
-            queue
-        };
-
+        for (const value of queueSpecial) {
+            allQueue.push(value)
+        }
+        for (const value of queueClassic) {
+            allQueue.push(value)
+        }
+        
         res.status(200).json(allQueue);
     } catch (error) {
         console.error('Error retrieving queue:', error);
