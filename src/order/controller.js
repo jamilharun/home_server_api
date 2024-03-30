@@ -889,7 +889,7 @@ const userCheckoutAndQueue = async (req, res) => {
 
 const userNewCheckout = async (req, res) => {
     console.log('user queue');
-    const  {checkoutid, userref, shopref, groupnum,}  = req.body;
+    const  {checkoutid, userref, shopref, groupnum}  = req.body;
     
     try {
         // Fetch cart based on groupNum
@@ -1033,6 +1033,51 @@ const userNewCheckout = async (req, res) => {
     }
 };
 
+const usernewQueue = async () => {
+    console.log('get new user queue');
+    const  {checkoutid, shopref, isspecial}  = req.body;
+    try {
+        const queue = [];
+        const globalQueue = []
+
+        const queueKeySpecial = `queue:${shopref}:special`; // Combine queue key logic
+        const queueKey = `queue:${shopref}`;
+    
+        const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
+        const queueItems = await redisClient.lrange(queueKey, 0, -1);
+    
+        for (const value of queueItemsSpecial) {
+            globalQueue.push(value);
+        }
+        for (const value of queueItems) {
+            globalQueue.push(value)
+        }
+
+        let matchingIndex = -1;
+
+        for (const [index, item] of globalQueue.entries()) {
+            if (item === JSON.stringify(checkoutid)) {
+                matchingIndex = index;
+                break;
+            }
+        }
+
+        if (matchingIndex !== -1) {
+            queue.push({ index: matchingIndex, data: checkoutid }); // Include both index and data
+        } else {
+            res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
+            return;
+        }
+
+        console.log('globalQueue: ', globalQueue);
+        console.log('res: ',queue);
+        res.status(200).json(queue);
+    } catch (error) {
+        console.error('Error retrieving queue:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+}
+
 
 module.exports = {
     //FETCH
@@ -1045,6 +1090,7 @@ module.exports = {
     userCheckoutAndQueue, //buyyer
     userCheckout,// buyyer
     shopCheckout, //seller
+    usernewQueue, //buyyer
 
     //CREATE
     createOrder,    //buyyer

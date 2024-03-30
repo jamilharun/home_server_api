@@ -39,4 +39,7 @@ router.get('/order/usercheckoutandqueue/:id', controller.userCheckoutAndQueue) /
 
 //buyyer
 router.post('/order/getNewOrder', controller.userNewCheckout) //buyyer
+
+router.post('/order/user/new/queue', controller.usernewQueue) //buyyer
+
 module.exports = router;
