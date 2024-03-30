@@ -37,4 +37,6 @@ router.get('/order/shop/:id/checkout', controller.shopCheckout) //shoop
 //dfdsfsdf
 router.get('/order/usercheckoutandqueue/:id', controller.userCheckoutAndQueue) //buyyer
 
+//buyyer
+router.post('/order/getNewOrder', controller.userNewCheckout) //buyyer
 module.exports = router;
