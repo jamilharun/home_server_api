@@ -700,9 +700,13 @@ const shopCheckout = async (req, res) => {
             console.log(checkout);
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
-            const itemRefs = await Promise.all(cart.map(cartd => `"${cartd.itemref}"`))
+            console.log(cart);
+            
+            const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
             // Fetch items for each cart
-            const items = await fetchItems(itemRefs) // assuming this works
+            const cartstring = JSON.stringify(cart)
+            
+            const items = await fetchItems(itemrefs) // assuming this works
             // Fetch shop details
             const shopDetails = await fetchShopDetails(shopref);
             
@@ -715,7 +719,7 @@ const shopCheckout = async (req, res) => {
             // Construct the data object for the checkout
             const checkoutData = {
                 checkout,
-                cart,
+                cartstring,
                 items,
                 shopDetails,
                 buyerDetails,
