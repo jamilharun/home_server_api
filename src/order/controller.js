@@ -726,7 +726,7 @@ const shopCheckout = async (req, res) => {
             dataByCheckoutId[checkoutid] = checkoutData;
         }
         // Return the grouped data
-        req.status(200).json(dataByCheckoutId) 
+        res.status(200).json(dataByCheckoutId) 
     } catch (error) {
         console.error('Error fetching data:', error);
         throw error;
