@@ -696,7 +696,7 @@ const shopCheckout = async (req, res) => {
         
         // Process each checkout
         for (const checkout of unfinishedCheckouts.rows) {
-            const { checkOutId, groupnum, shopref, userref } = checkout;
+            const { checkoutid, groupnum, shopref, userref } = checkout;
             console.log(checkout);
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
