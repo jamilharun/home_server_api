@@ -689,7 +689,7 @@ const shopCheckout = async (req, res) => {
     const  shopid  = req.params.id;
     try {
         // Fetch unfinished checkouts for the given userId
-        const unfinishedCheckouts = await pool.query('SELECT * FROM "checkout" WHERE shopRef = $1 AND isFinished = false', [shopid]);
+        const unfinishedCheckouts = await pool.query(queries.getShopOrder, [shopid]);
         
         // Group data by checkoutId
         const dataByCheckoutId = {};
@@ -739,6 +739,7 @@ const shopCheckout = async (req, res) => {
             // SQL query to fetch cart based on groupNum
             const sqlQuery = 'SELECT * FROM "cart" WHERE groupNum = $1';
             // Execute the query
+            console.log(groupNum);
             const { rows } = await pool.query(sqlQuery, [groupNum]);      
             return rows; // Return the fetched rows
         } catch (error) {
@@ -748,40 +749,33 @@ const shopCheckout = async (req, res) => {
     }
 
     async function fetchItems(itemRefs) {
+        console.log('fetching items');
         try {
-            const redisItems = await Promise.all(itemRefs.map(itemRef => {redisClient.get(itemRef)}));
-            // console.log(redisItems);
-            if (redisItems) {
-                console.log(redisItems);
-                console.log('gonna fetch from sanity');
+            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+      
+            if (redisItems.every(item => item !== null && item !== undefined)) {
+              console.log('redis items found');;
+              return redisItems
             } else {
-                console.log(redisItems);
-                console.log('gonna fetch from redis');
+              console.log('fetching in sanity');
+              const query = `*[_id in [${itemRefs.map(ref => `"${ref}"`).join(',')}]]`;
+              const items = await sanity.fetch(query);
+        
+              if (items && items.length > 0) {
+                  await Promise.all(items.map(item => {
+                      redisClient.set(item._id, JSON.stringify(item))
+                      console.log(`${item._id} added to redis`);
+                  }));
+                  return items;
+              }
             }
-                
-            // }
-            // if (redisItems.every(item => item !== null || item !== undefined)) {
-            //     return redisItems;
-            // }
-    
-            // const query = `*[_id in [${itemRefs}]]`;
-            // const items = await sanity.fetch(query, params);
-    
-            // if (items && items.length > 0) {
-            //     await Promise.all(items.map(item => {
-            //         redisClient.set(item._id, JSON.stringify(item))
-            //         console.log(`${item._id} added to redis`);
-            //     }));
-            //     return items;
-            // } 
-    
             return []; // No items found
         } catch (error) {
             console.error('Error fetching items:', error);
             throw error;
         }
     }
-    
+  
     async function fetchShopDetails(shopRef) {
         // Fetch shop details from Redis or Sanity.io based on shopRef
         console.log('fetching shop details');
