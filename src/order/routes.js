@@ -14,11 +14,11 @@ router.post('/order/cancel', controller.cancelOrder); //buyyers
 
 router.get('/order/details/:id', controller.getOrderDetails); //seller
 
-router.post('/order/readytopickup', controller.setpickup); //seller //for pickingup finished items
+router.get('/order/readypickup/:id', controller.setpickup); //seller //finished //for pickingup finished items
 //sub routes
-router.post('/order/removeFromPickup', controller.removePickup); //buyyer //when buyyer already pickup the item
+router.get('/order/removePickup/:id', controller.removePickup); //buyyer //finished //when buyyer already pickup the item
 
-router.get('/order/shop/:id/queue', controller.getAllQueue); //seller
+router.get('/order/shop/:id/queue', controller.getAllQueue); //seller //finished
 
 router.get('/order/user/:id/queue', controller.getUserQueue); //buyyer //finished
 

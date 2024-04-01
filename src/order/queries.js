@@ -24,9 +24,10 @@ const cartItems   = 'SELECT * ' +
                     'FROM "cart" ' +
                     'WHERE groupNum = $1';
 //seller
-const isFinished  = 'UPDATE "checkOut" ' +
-                    'SET isFinished = $1 ' +
-                    'WHERE checkOutId = $2'
+const isFinished = 'UPDATE "checkout" ' +
+                  'SET isFinished = true ' +
+                  'WHERE checkOutId = $1 ' +
+                  'RETURNING *'  // Replace * with specific columns if needed
 //buyyer
 const getUserOrder=`SELECT c.*, p.* 
                     FROM checkout c 
