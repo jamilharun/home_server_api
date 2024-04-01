@@ -407,7 +407,7 @@ const getAllQueue = async (req, res) => {
 const getUserQueue = async (req, res) => {
     console.log('get user queue');
     const userId = req.params.id; // Corrected variable name
-  
+    console.log(userId);
     try {
       const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
           
@@ -464,29 +464,6 @@ const getUserQueue = async (req, res) => {
             return;
         }
     }
-    //   for (const checkout of unfinishedCheckouts.rows) { // Use descriptive name
-    //     // console.log(checkout);
-    //     const queueKey = `queue:${checkout.shopref}${checkout.isspecial ? ':special' : ''}`; // Combine queue key logic
-          
-    //     console.log(queueKey);
-    //     // const queueLength = await redisClient.llen(queueKey);
-    //     const queueItems = await redisClient.lrange(queueKey, 0, -1);
-    //     console.log(`all queue ${checkout.isspecial ? ':special' : ''}`,queueItems);
-        
-
-    //     let matchingIndex = -1;
-        
-    //     // Use a for...of loop to iterate over array elements
-    //     for (const value of queueAll){
-    //         for (const [index, item] of queueItems.entries()) {
-    //             if (item === JSON.stringify(value)) {
-    //                 matchingIndex = index;
-    //                 break;
-    //             }
-    //         }
-    //     }            
-        
-    //   }
       console.log('classic', queueClassic);
       console.log('special', queueSpecial);
       console.log('all', queueAll);
