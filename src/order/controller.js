@@ -440,8 +440,8 @@ const getUserQueue = async (req, res) => {
         const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         
-        console.log('queueSpecial', queueItemsSpecial);
-        console.log('quuee', queueItems);
+        // console.log('queueSpecial', queueItemsSpecial);
+        // console.log('quuee', queueItems);
         for (const value of queueItemsSpecial) {
             // console.log('+1 special');
             globalQueue.push(value);
@@ -455,6 +455,7 @@ const getUserQueue = async (req, res) => {
         let matchingIndex = -1;
 
         for (const [index, item] of globalQueue.entries()) {
+            console.log(item , ' ', value);
             if (item === JSON.stringify(value)) {
                 // console.log('mi +1');
                 matchingIndex = index;
