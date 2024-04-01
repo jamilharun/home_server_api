@@ -433,47 +433,48 @@ const getUserQueue = async (req, res) => {
         for (const value of queueClassic) {queueAll.push(value)}
   
         for (const value of queueAll){
-        const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
-        // console.log(checkoutData);
+            const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
+            // console.log(checkoutData);
 
-        const globalQueue = []
+            const globalQueue = []
 
-        const queueKeySpecial = `queue:${checkoutData.shopref}:special`; // Combine queue key logic
-        const queueKey = `queue:${checkoutData.shopref}`;
+            const queueKeySpecial = `queue:${checkoutData.shopref}:special`; // Combine queue key logic
+            const queueKey = `queue:${checkoutData.shopref}`;
 
-        const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
-        const queueItems = await redisClient.lrange(queueKey, 0, -1);
-        
-        // console.log('queueSpecial', queueItemsSpecial);
-        // console.log('quuee', queueItems);
-        for (const value of queueItemsSpecial) {
-            // console.log('+1 special');
-            globalQueue.push(value);
-        }
-        for (const value of queueItems) {
-            // console.log('+1 classic');
-            globalQueue.push(value)
-        }
-
-        // console.log('globalqueue', globalQueue);
-        let matchingIndex = -1;
-
-        for (const [index, item] of globalQueue.entries()) {
-            // console.log(item , ' ', value);
-            if (item === JSON.stringify(value)) {
-                // console.log('mi +1');
-                matchingIndex = index;
-                // console.log(matchingIndex);
-                break;
+            const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
+            const queueItems = await redisClient.lrange(queueKey, 0, -1);
+            
+            // console.log('queueSpecial', queueItemsSpecial);
+            // console.log('quuee', queueItems);
+            for (const value of queueItemsSpecial) {
+                // console.log('+1 special');
+                globalQueue.push(value);
             }
-        }
-        if (matchingIndex !== -1) {
-            queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
-            // console.log('nag push na');
-        } else {
-            res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
-            return;
-        }
+            for (const value of queueItems) {
+                // console.log('+1 classic');
+                globalQueue.push(value)
+            }
+
+            // console.log('globalqueue', globalQueue);
+            let matchingIndex = -1;
+
+            for (const [index, item] of globalQueue.entries()) {
+                // console.log(item , ' ', value);
+                if (item === JSON.stringify(value)) {
+                    // console.log('mi +1');
+                    matchingIndex = index;
+                    // console.log(matchingIndex);
+                    break;
+                }
+            }
+            if (matchingIndex !== -1) {
+                console.log(matchingIndex, checkoutData.checkoutid );
+                queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+                // console.log('nag push na');
+            } else {
+                res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
+                return;
+            }
         }
     //   console.log('classic', queueClassic);
     //   console.log('special', queueSpecial);
