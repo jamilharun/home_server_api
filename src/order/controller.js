@@ -35,7 +35,7 @@ const createOrder = async (req, res) => {
 
     console.log(req.body);
 
-    const returndata = '';
+    let returndata = '';
 
     try {
         const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, 
@@ -75,6 +75,7 @@ const createOrder = async (req, res) => {
     const { cartItems } = req.body;
     console.log(cartItems);
     try {
+        const cartOutput = [];
         for (const itemId in cartItems) {
             if (cartItems.hasOwnProperty(itemId)) {
                 const items = cartItems[itemId];
@@ -92,6 +93,7 @@ const createOrder = async (req, res) => {
                     const outPut = result.rows[0]; // Assuming you want to return the first inserted row
                     console.log('outPut:', outPut);
                     // You might want to collect all outputs and send them back after the loop completes
+                    cartOutput.push(outPut)
                 } catch (err) {
                     console.error('Error creating cart item:', err);
                     res.status(500).json({ error: err.message });
@@ -100,12 +102,13 @@ const createOrder = async (req, res) => {
             }
         }
         // Send response after all cart items are inserted
-        console.log('reutrnData', returndata)
+        console.log('reutrnData: ', returndata)
+        console.log('cartOutput: ', cartOutput);
         res.status(201).json(returndata)
-        // res.status(201).json({ message: 'Cart items created successfully' });
+                
     } catch (error) {
         // Handle errors
-        console.error('Error creating cart item:', error);
+        console.error('creating cart somethings wrong:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
     
