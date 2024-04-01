@@ -430,7 +430,7 @@ const getUserQueue = async (req, res) => {
   
       for (const value of queueAll){
         const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
-        console.log(checkoutData);
+        // console.log(checkoutData);
 
         const globalQueue = []
 
@@ -440,10 +440,14 @@ const getUserQueue = async (req, res) => {
         const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         
+        console.log('queueSpecial', queueItemsSpecial);
+        console.log('quuee', queueItems);
         for (const value of queueItemsSpecial) {
+            // console.log('+1 special');
             globalQueue.push(value);
         }
         for (const value of queueItems) {
+            // console.log('+1 classic');
             globalQueue.push(value)
         }
 
@@ -452,12 +456,13 @@ const getUserQueue = async (req, res) => {
 
         for (const [index, item] of globalQueue.entries()) {
             if (item === JSON.stringify(value)) {
+                // console.log('mi +1');
                 matchingIndex = index;
                 break;
             }
         }
-
         if (matchingIndex !== -1) {
+
             queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
         } else {
             res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
