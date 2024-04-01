@@ -42,4 +42,5 @@ router.post('/order/getNewOrder', controller.userNewCheckout) //buyyer
 
 router.post('/order/user/new/queue', controller.usernewQueue) //buyyer
 
+router.get('/order/user/pickup/:id', controller.getUserPickup)
 module.exports = router;

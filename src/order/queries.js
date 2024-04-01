@@ -44,11 +44,11 @@ const getShopOrder=`SELECT c.*, p.*
                     c.isCanceled = FALSE AND  
                     c.isFinished = FALSE AND  
                     c.shopRef = $1; `
-// //buyyer //queue
-// const getCheckoutId='SELECT * ' + 
-//                     'FROM "checkout" ' +
-//                     'WHERE checkOutId = $1'
-
+// buyyer
+const finishedOrder = 'SELECT * ' +
+                    'FROM "checkout" ' +
+                    'WHERE userRef = $1 ' *
+                    'AND isFinished = TRUE';
 
 module.exports = {
     //FETCH
@@ -58,6 +58,7 @@ module.exports = {
     cartItems, //seller
     getShopOrder, //seller
     // getCheckoutId, //buyyer //queue
+    finishedOrder,
     //CREATE
     createOrder, //buyyer
     createCart, //buyyer

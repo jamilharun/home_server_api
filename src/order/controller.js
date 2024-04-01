@@ -1091,6 +1091,54 @@ const usernewQueue = async (req, res) => {
 }
 
 
+const getUserPickup = async (req, res) => {
+    console.log('get user queue');
+    const userId = req.params.id; // Corrected variable name
+  
+    try {
+      const finishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+          
+      const queue = [];
+      const queuePickup = [];
+
+      for (const checkout of finishedCheckouts.rows) {
+        queuePickup.push(checkout.checkoutid);    
+      }
+
+      for (const value of queuePickup){
+        const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
+        console.log(checkoutData);
+
+        const queueKey = `pickup:${checkoutData.shopref}`;
+
+        const queueItems = await redisClient.lrange(queueKey, 0, -1);
+
+        let matchingIndex = -1;
+
+        for (const [index, item] of queueItems.entries()) {
+            if (item === JSON.stringify(value)) {
+                matchingIndex = index;
+                break;
+            }
+        }
+
+        if (matchingIndex !== -1) {
+            queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+        } else {
+            res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
+            return;
+        }
+    }
+      
+      console.log('res: ',queue);
+      res.status(200).json(queue);
+    } catch (error) {
+      console.error('Error retrieving queue:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+  
+
 module.exports = {
     //FETCH
     getOrders,      //data management
@@ -1103,7 +1151,7 @@ module.exports = {
     userCheckout,// buyyer
     shopCheckout, //seller
     usernewQueue, //buyyer
-
+    getUserPickup, //buyyer
     //CREATE
     createOrder,    //buyyer
     // createCart,     //buyyer
