@@ -100,6 +100,7 @@ const createOrder = async (req, res) => {
             }
         }
         // Send response after all cart items are inserted
+        console.log('reutrnData', returndata)
         res.status(201).json(returndata)
         // res.status(201).json({ message: 'Cart items created successfully' });
     } catch (error) {
@@ -407,10 +408,10 @@ const getAllQueue = async (req, res) => {
 const getUserQueue = async (req, res) => {
     console.log('get user queue');
     const userId = req.params.id; // Corrected variable name
-    console.log(userId);
+    // console.log(userId);
     try {
         const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
-            
+
         const queue = [];
         const queueSpecial = [];
         const queueClassic = [];
