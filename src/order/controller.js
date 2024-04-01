@@ -1096,7 +1096,7 @@ const getUserPickup = async (req, res) => {
     const userId = req.params.id; // Corrected variable name
   
     try {
-      const finishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+      const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
           
       const queue = [];
       const queuePickup = [];
