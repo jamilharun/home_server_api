@@ -468,8 +468,8 @@ const getUserQueue = async (req, res) => {
                 }
             }
             if (matchingIndex !== -1) {
-                console.log(matchingIndex, checkoutData.checkoutid );
                 queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+                console.log(matchingIndex, checkoutData.checkoutid );
                 // console.log('nag push na');
             } else {
                 res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
@@ -479,9 +479,10 @@ const getUserQueue = async (req, res) => {
     //   console.log('classic', queueClassic);
     //   console.log('special', queueSpecial);
         // console.log('all', queueAll);
-      
-        console.log('res: ',queue);
-        res.status(200).json(queue);
+        if (queue) {
+            console.log('res: ',queue);
+            res.status(200).json(queue);
+        }
     } catch (error) {
       console.error('Error retrieving queue:', error);
       res.status(500).json({ error: 'Internal server error' });
