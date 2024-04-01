@@ -409,24 +409,24 @@ const getUserQueue = async (req, res) => {
     const userId = req.params.id; // Corrected variable name
     console.log(userId);
     try {
-      const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
-          
-      const queue = [];
-      const queueSpecial = [];
-      const queueClassic = [];
-      const queueAll = [];
+        const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+            
+        const queue = [];
+        const queueSpecial = [];
+        const queueClassic = [];
+        const queueAll = [];
 
-      for (const checkout of unfinishedCheckouts.rows) {
-        //sort queue type 
-        if (checkout.isspecial) {
-            queueSpecial.push(checkout.checkoutid);    
-        } else {
-            queueClassic.push(checkout.checkoutid);
+        for (const checkout of unfinishedCheckouts.rows) {
+          //sort queue type 
+          if (checkout.isspecial) {
+              queueSpecial.push(checkout.checkoutid);    
+          } else {
+              queueClassic.push(checkout.checkoutid);
+          }
         }
-      }
 
-      for (const value  of queueSpecial) {queueAll.push(value)}
-      for (const value of queueClassic) {queueAll.push(value)}
+        for (const value  of queueSpecial) {queueAll.push(value)}
+        for (const value of queueClassic) {queueAll.push(value)}
   
         for (const value of queueAll){
         const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
