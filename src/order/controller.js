@@ -428,7 +428,7 @@ const getUserQueue = async (req, res) => {
       for (const value  of queueSpecial) {queueAll.push(value)}
       for (const value of queueClassic) {queueAll.push(value)}
   
-      for (const value of queueAll){
+        for (const value of queueAll){
         const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
         // console.log(checkoutData);
 
@@ -459,24 +459,24 @@ const getUserQueue = async (req, res) => {
             if (item === JSON.stringify(value)) {
                 // console.log('mi +1');
                 matchingIndex = index;
-                console.log(matchingIndex);
+                // console.log(matchingIndex);
                 break;
             }
         }
         if (matchingIndex !== -1) {
             queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
-            console.log('nag push na');
+            // console.log('nag push na');
         } else {
             res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
             return;
         }
-    }
+        }
     //   console.log('classic', queueClassic);
     //   console.log('special', queueSpecial);
-      console.log('all', queueAll);
+        // console.log('all', queueAll);
       
-      console.log('res: ',queue);
-      res.status(200).json(queue);
+        console.log('res: ',queue);
+        res.status(200).json(queue);
     } catch (error) {
       console.error('Error retrieving queue:', error);
       res.status(500).json({ error: 'Internal server error' });
