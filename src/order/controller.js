@@ -1092,21 +1092,22 @@ const usernewQueue = async (req, res) => {
 
 
 const getUserPickup = async (req, res) => {
-    console.log('get user queue');
+    console.log('get user pickup');
     const userId = req.params.id; // Corrected variable name
   
     try {
       const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
-          
+        console.log('fin data:',finishedCheckouts);
       const queue = [];
       const queuePickup = [];
 
       for (const checkout of finishedCheckouts.rows) {
         queuePickup.push(checkout.checkoutid);    
       }
-
+      console.log('queuePickup', queuePickup);
       for (const value of queuePickup){
         const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
+        
         console.log(checkoutData);
 
         const queueKey = `pickup:${checkoutData.shopref}`;
