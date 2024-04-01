@@ -451,7 +451,7 @@ const getUserQueue = async (req, res) => {
             globalQueue.push(value)
         }
 
-        console.log('globalqueue', globalQueue);
+        // console.log('globalqueue', globalQueue);
         let matchingIndex = -1;
 
         for (const [index, item] of globalQueue.entries()) {
@@ -464,15 +464,15 @@ const getUserQueue = async (req, res) => {
             }
         }
         if (matchingIndex !== -1) {
-
             queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+            console.log('nag push na');
         } else {
             res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
             return;
         }
     }
-      console.log('classic', queueClassic);
-      console.log('special', queueSpecial);
+    //   console.log('classic', queueClassic);
+    //   console.log('special', queueSpecial);
       console.log('all', queueAll);
       
       console.log('res: ',queue);
