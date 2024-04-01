@@ -455,10 +455,11 @@ const getUserQueue = async (req, res) => {
         let matchingIndex = -1;
 
         for (const [index, item] of globalQueue.entries()) {
-            console.log(item , ' ', value);
+            // console.log(item , ' ', value);
             if (item === JSON.stringify(value)) {
                 // console.log('mi +1');
                 matchingIndex = index;
+                console.log(matchingIndex);
                 break;
             }
         }
