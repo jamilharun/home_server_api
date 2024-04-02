@@ -425,6 +425,7 @@ const getUserQueuev2 = async (req, res) => {
                 console.log('Matching index:', matchingIndex, 'Checkout ID:', checkout.checkoutid);
             } else {
                 console.log('Checkout ID not found in the queue special');
+                console.log('Matching index:', matchingIndex, 'Checkout ID:', checkout.checkoutid);
                 res.status(404).json({ error: 'Checkout ID not found in the queue special' });
                 return;
             }
