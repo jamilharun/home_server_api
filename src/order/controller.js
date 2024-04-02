@@ -495,6 +495,7 @@ const getGlobalQueue = async (checkout) => {
         for (const value of queueClassic) {queueAll.push(value)}
   
         const queue = await gettingQueue(queueAll, unfinishedCheckouts);
+        console.log('Queue:', queueAll);
         console.log('Queue:', queue);
         res.status(200).json(queue);
     } catch (error) {
