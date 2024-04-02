@@ -20,7 +20,9 @@ router.get('/order/removePickup/:id', controller.removePickup); //buyyer //finis
 
 router.get('/order/shop/:id/queue', controller.getAllQueue); //seller //finished
 
-router.get('/order/user/:id/queue', controller.getUserQueue); //buyyer //finished
+// router.get('/order/user/:id/queue', controller.getUserQueue); //buyyer //finished
+router.get('/order/user/:id/queue', controller.getUserQueuev2); //buyyer //finished
+
 
 router.post('/order/indexqueue', controller.indexQueue); //buyyers
 
