@@ -430,9 +430,6 @@ const getUserQueuev2 = async (req, res) => {
             }
         }
 
-        console.log('Classic queue:', queueClassic);
-        console.log('Special queue:', queueSpecial);
-        console.log('All queue:', queueAll);
         console.log('Response:', queue);
         res.status(200).json(queue);
     } catch (error) {
@@ -448,7 +445,15 @@ const getGlobalQueue = async (checkout) => {
     const queueItemsSpecial = await redisClient.lrange(queueKeySpecial, 0, -1);
     const queueItems = await redisClient.lrange(queueKey, 0, -1);
 
-    const globalQueue = [...queueItemsSpecial, ...queueItems];
+    const globalQueue = [];
+
+    for (const value of queueItemsSpecial) {
+        globalQueue.push(value)
+    }
+    for (const value of queueItems) {
+        globalQueue.push(value)
+    }
+
     return globalQueue;
 };
 
