@@ -479,10 +479,13 @@ const getUserQueue = async (req, res) => {
     //   console.log('classic', queueClassic);
     //   console.log('special', queueSpecial);
         // console.log('all', queueAll);
-        if (queue) {
+        const responce = () => {
             console.log('res: ',queue);
             res.status(200).json(queue);
         }
+        responce()
+
+        
     } catch (error) {
       console.error('Error retrieving queue:', error);
       res.status(500).json({ error: 'Internal server error' });
