@@ -476,6 +476,9 @@ const getUserQueue = async (req, res) => {
                 return;
             }
         }
+        for (let index = 0; index < 1; index++) {
+            console.log('yay this work');
+        }
         console.log('classic', queueClassic);
         console.log('special', queueSpecial);
         console.log('all', queueAll);
