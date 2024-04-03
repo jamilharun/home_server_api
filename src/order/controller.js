@@ -7,6 +7,10 @@ const { generateToken } = require('../utils/auth');
 const sanity = require('../lib/sanity');
 const axios = require('axios');
 
+require('dotenv').config({path: '.env.paymongo'});
+// (process.env.NODE_ENV_PAYMONGO_SECRET);
+const serverurl = 'http://139.162.10.135:3000/api/paymongo/confirmPayment';
+
 
 const getOrders = async (req, res) => {
     console.log('get orders');
@@ -219,7 +223,7 @@ const initializePay = async (_id, amount, name, email, phone, method, created_at
       
     } catch (error) {
       console.log('payment initializing error: ', error);
-      res.status(400).json({error: error.message || error});
+    //   res.status(400).json({error: error.message || error});
     }
   };
   
