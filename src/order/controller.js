@@ -1567,6 +1567,56 @@ const getUserPickup = async (req, res) => {
       
 };
 
+const getUserPickupv3 = async (req, res) => {
+    console.log('get user pickup');
+    const userId = req.params.id;
+    console.log(userId);
+    try {
+      const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
+        console.log('fin data:',finishedCheckouts);
+      const queue = [];
+      const checkoutDataMap = {}; // Store checkout data for lookup
+
+      for (const checkout of finishedCheckouts.rows) {
+        queuePickup.push(checkout.checkoutid);    
+        checkoutDataMap[checkout.checkoutid] = checkout; // Map checkout id to data
+      }
+      console.log('queuePickup', queuePickup);
+
+      for (const value of queuePickup){
+        const checkoutData = checkoutDataMap[value]; // Use pre-fetched data
+        
+        console.log(checkoutData);
+
+        const queueKey = `pickup:${checkoutData.shopref}`;
+
+        const queueItems = await redisClient.lrange(queueKey, 0, -1);
+
+        let matchingIndex = -1;
+
+        for (const [index, item] of queueItems.entries()) {
+            if (item === JSON.stringify(value)) {
+                matchingIndex = index;
+                break;
+            }
+        }
+
+        if (matchingIndex !== -1) {
+            queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+        } else {
+            res.status(404).json({ error: 'Checkout ID not found in the pickup' });         
+            return;
+        }
+    }
+        const queueString = JSON.stringify(queue) 
+      console.log('res pickup: ',queueString);
+      res.status(200).json(queueString);
+    } catch (error) {
+      console.error('Error retrieving queue:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+  };
+
 
 module.exports = {
     //FETCH
@@ -1585,6 +1635,7 @@ module.exports = {
     usernewQueue, //buyyer
     getUserPickup, //buyyer
     getUserPickupv2, //dublicate //buyyer
+    getUserPickupv3,
     //CREATE
     createOrder,    //buyyer
     // createCart,     //buyyer
