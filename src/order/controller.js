@@ -1366,7 +1366,7 @@ const getUserPickup = async (req, res) => {
     console.log(userId);
     try {
       const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
-        console.log('fin data:',finishedCheckouts);
+        // console.log('fin data:',finishedCheckouts);
       const queue = [];
       const queuePickup = [];
 
@@ -1377,7 +1377,7 @@ const getUserPickup = async (req, res) => {
       for (const value of queuePickup){
         const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
         
-        console.log(checkoutData);
+        // console.log(checkoutData);
 
         const queueKey = `pickup:${checkoutData.shopref}`;
 
