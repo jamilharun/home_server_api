@@ -44,13 +44,14 @@ const createCustomOrder = async (req, res) => {
             console.log('initiallizepayment error');
             res.status(400).json({ error: 'initiallizepeyment server error' });
         }
-        // let payinf = initiallizepayment.result;
+        let payinf = initiallizepayment.result;
         let payint = initiallizepayment.createPayIntent.data.id;
         let nexact = initiallizepayment.attachPayIntent.data.attributes.next_action.redirect;
         
         const isCanceled = false;
 
-        const nwOrder = await addCheckout(payint, userRef, shopRef, groupNum, serviceTax, deliveryFee,
+        console.log(payinf);
+        const nwOrder = await addCheckout(payinf.paymentid, userRef, shopRef, groupNum, serviceTax, deliveryFee,
              totalAmount, location, isSpecial, isCanceled, isFinished, created_at, cartItems);
         if (!nwOrder) {
             console.log('add checkout error');
