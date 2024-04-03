@@ -1407,7 +1407,166 @@ const getUserPickup = async (req, res) => {
       res.status(500).json({ error: 'Internal server error' });
     }
   };
-  
+
+  const getUserPickupv2 = async (req, res) => {
+    console.log('user queue');
+    const  userId  = req.params.id;
+    
+    // Implement functions to fetch data from Redis or other sources
+    async function fetchCartByGroupNum(groupNum) {
+        // Fetch cart based on groupNum
+        try {
+            // SQL query to fetch cart based on groupNum
+            const sqlQuery = 'SELECT * FROM "cart" WHERE groupNum = $1';
+            // Execute the query
+            console.log(groupNum);
+            const { rows } = await pool.query(sqlQuery, [groupNum]);
+
+            return rows; // Return the fetched rows
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            throw error; // Rethrow the error for handling elsewhere
+        }
+    }
+
+    async function fetchItems(itemRefs) {
+        console.log('fetching items');
+        try {
+            const redisItems = await Promise.all(itemRefs.map(itemRef => redisClient.get(itemRef)));
+      
+            if (redisItems.every(item => item !== null && item !== undefined)) {
+              console.log('redis items found');;
+              return redisItems
+            } else {
+              console.log('fetching in sanity');
+              const query = `*[_id in [${itemRefs.map(ref => `"${ref}"`).join(',')}]]`;
+              const items = await sanity.fetch(query);
+        
+              if (items && items.length > 0) {
+                  await Promise.all(items.map(item => {
+                      redisClient.set(item._id, JSON.stringify(item))
+                      console.log(`${item._id} added to redis`);
+                  }));
+                  return items;
+              }
+            }
+            return []; // No items found
+        } catch (error) {
+            console.error('Error fetching items:', error);
+            throw error;
+        }
+    }
+          
+    async function fetchShopDetails(shopRef) {
+        // Fetch shop details from Redis or Sanity.io based on shopRef
+        console.log('fetching shop details');
+        try {
+            const shopDetails = await redisClient.get(shopRef);
+            
+            if (!shopDetails) {
+                console.log(`shop ${shopRef} not found in redis`);
+                const query = `*[_type == 'shop' && _id == '${shopRef}']`;
+                // const params = { shopRef };
+                const fetchedShopDetails = await sanity.fetch(query);
+                console.log(fetchedShopDetails);
+                if (fetchedShopDetails.length === 1) {
+                    await redisClient.set(fetchedShopDetails[0]._id, JSON.stringify(fetchedShopDetails[0]));
+                    console.log('fetching shop successful');
+                    return fetchedShopDetails[0];
+                } else {
+                    console.log('Shop not found in Sanity.io');
+                    return null;
+                }
+            } else {
+                console.log('fetching shop successful');
+                return shopDetails;
+            }
+        } catch (error) {
+            console.log('connection error', error);
+            throw error; // or handle the error as needed
+        }
+    }
+    
+    async function fetchUserDetails(userRef) {
+        console.log(userRef);
+        try {
+          // 1. Attempt to fetch from Redis
+          const userData = await redisClient.get(`user:${userRef}`);
+          if (userData) {
+            return JSON.parse(userData);
+          }
+      
+          // 2. Fallback to PostgreSQL if Redis miss
+          const query = `SELECT * FROM "user" WHERE userid = $1`; // Adjust query based on your table structure
+          const params = [userRef];
+          const result = await pool.query(query, params);
+      
+          if (result.rows.length > 0) {
+            const user = result.rows[0];
+            // 3. Store data in Redis for future requests (optional)
+            await redisClient.set(`user:${userRef}`, JSON.stringify(user));
+            return user;
+          }
+      
+          return null; // Indicate data not found
+        } catch (error) {
+          console.error('Error fetching user details:', error);
+          throw error; // Rethrow the error for handling elsewhere
+        }
+    }
+
+    try {
+        // Fetch unfinished checkouts for the given userId
+        const unfinishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
+        
+        // Group data by checkoutId
+        const dataByCheckoutId = {};
+        
+        // Process each checkout
+        for (const checkout of unfinishedCheckouts.rows) {
+            const { checkoutid, groupnum, shopref, userref } = checkout;
+            
+            console.log(checkout)
+            // Fetch cart based on groupNum
+            const cart = await fetchCartByGroupNum(groupnum);
+            const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
+            
+            console.log(cart);
+            const cartstring = JSON.stringify(cart)
+            // Fetch items for each cart
+            // console.log(itemrefs);
+            const items = await fetchItems(itemrefs) // assuming this works
+            // Fetch shop details
+            const shopDetails = await fetchShopDetails(shopref);
+            
+            // Fetch buyer user details
+            const buyerDetails = await fetchUserDetails(userref);
+            
+            // Fetch shop owner details //im not sure if this is important
+            const shopOwnerDetails = await fetchUserDetails(shopDetails?.shopowner);
+            
+            // Construct the data object for the checkout
+            const checkoutData = {
+                checkout,
+                cartstring,
+                items,
+                shopDetails,
+                buyerDetails,
+                shopOwnerDetails
+            };
+            console.log(checkoutData);
+            // Group the data by checkoutId
+            dataByCheckoutId = checkoutData;
+        }
+        // Return the grouped data
+        res.status(200).json(dataByCheckoutId) 
+    } catch (error) {
+        console.error('Error fetching data:', error);
+        throw error;
+    }
+      
+};
+
 
 module.exports = {
     //FETCH
@@ -1425,6 +1584,7 @@ module.exports = {
     shopCheckout, //seller
     usernewQueue, //buyyer
     getUserPickup, //buyyer
+    getUserPickupv2, //buyyer
     //CREATE
     createOrder,    //buyyer
     // createCart,     //buyyer
