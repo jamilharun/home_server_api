@@ -162,7 +162,9 @@ const initializePay = async (_id, amount, name, email, phone, method, created_at
       console.log('keys not available');
     }
     const base64TestSecretKey = Buffer.from(envdata.secret).toString('base64');
+    console.log(base64TestSecretKey);
     try {
+
       // Creating a payment intent
       const createPayIntent = await axios.post('https://api.paymongo.com/v1/payment_intents', {
         data: {
