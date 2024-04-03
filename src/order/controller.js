@@ -1401,7 +1401,7 @@ const getUserPickup = async (req, res) => {
     }
         // const queueString = JSON.stringify(queue) 
       console.log('res pickup: ',queue);
-      res.status(200).json(queue);
+      res.status(200).json(JSON.parse(queue));
     } catch (error) {
       console.error('Error retrieving queue:', error);
       res.status(500).json({ error: 'Internal server error' });
