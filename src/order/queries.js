@@ -45,7 +45,7 @@ const getShopOrder=`SELECT c.*, p.*
 // buyyer
 const finishedOrder = 'SELECT * ' +
                     'FROM "checkout" ' +
-                    'WHERE isFinished = TRUE ' *
+                    'WHERE isFinished = TRUE ' +
                     'AND userRef = $1';
 
 module.exports = {
