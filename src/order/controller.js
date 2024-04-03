@@ -1395,7 +1395,7 @@ const getUserPickup = async (req, res) => {
         if (matchingIndex !== -1) {
             queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
         } else {
-            res.status(404).json({ error: 'Checkout ID not found in the queue special' });         
+            res.status(404).json({ error: 'Checkout ID not found in the pickup' });         
             return;
         }
     }
@@ -1556,7 +1556,7 @@ const getUserPickup = async (req, res) => {
             };
             console.log(checkoutData);
             // Group the data by checkoutId
-            dataByCheckoutId = checkoutData;
+            dataByCheckoutId[checkoutid] = checkoutData;
         }
         // Return the grouped data
         res.status(200).json(dataByCheckoutId) 
@@ -1584,7 +1584,7 @@ module.exports = {
     shopCheckout, //seller
     usernewQueue, //buyyer
     getUserPickup, //buyyer
-    getUserPickupv2, //buyyer
+    getUserPickupv2, //dublicate //buyyer
     //CREATE
     createOrder,    //buyyer
     // createCart,     //buyyer
