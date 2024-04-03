@@ -113,6 +113,104 @@ router.post('/addPayment', async (req, res) => {
   }
 });
 
+//i dunno ill use this
+// const initializePay = async (_id, amount, name, email, phone, method, created_at) => {
+//   console.log('initialize pay');
+//   if (_id === '42662a99-47b5-490d-915b-597b2f8cdbf9') {
+//     envdata =  {
+//       public: process.env.NODE_ENV_PAYMONGO_PUBLIC_jamil,
+//       secret: process.env.NODE_ENV_PAYMONGO_SECRET_jamil
+//     };
+//     console.log(envdata);
+//   } if (_id === '7d66bd84-ca24-454d-8b5b-b317146c339c') {
+//     envdata =  {
+//       public: process.env.NODE_ENV_PAYMONGO_PUBLIC_shaina,
+//       secret: process.env.NODE_ENV_PAYMONGO_SECRET_shaina
+//     };
+//   } else {
+//     console.log('keys not available');
+//   }
+//   const base64TestSecretKey = Buffer.from(envdata.secret).toString('base64');
+//   try {
+//     // Creating a payment intent
+//     const createPayIntent = await axios.post('https://api.paymongo.com/v1/payment_intents', {
+//       data: {
+//         attributes: {
+//           amount: amount,
+//           payment_method_allowed: ['paymaya', 'gcash', 'grab_pay'],
+//           payment_method_options: {card: {request_three_d_secure: 'any'}},
+//           currency: 'PHP',
+//           capture_type: 'automatic',
+//           description: 'e-wallet only'
+//         }
+//       }
+//     }, {
+//       headers: {
+//         'Authorization': `Basic ${base64TestSecretKey}`
+//       }
+//     });
+
+//     // Creating a payment method
+//     const createPayMethod = await axios.post('https://api.paymongo.com/v1/payment_methods', {
+//       data: {
+//         attributes: {
+//           billing: {name: name, email: email, phone: phone},
+//           type: method
+//         }
+//       }
+//     }, {
+//       headers: {
+//         'Authorization': `Basic ${base64TestSecretKey}`
+//       }
+//     });
+
+//     // Attaching payment method to payment intent
+//     const attachPayIntent = await axios.post(`https://api.paymongo.com/v1/payment_intents/${createPayIntent.data.data.id}/attach`, {
+//       data: {
+//         attributes: {
+//           payment_method: createPayMethod.data.data.id,
+//           return_url: serverurl
+//         }
+//       }
+//     }, {
+//       headers: {
+//         'Authorization': `Basic ${base64TestSecretKey}`
+//       }
+//     });
+
+//     const query = `INSERT INTO payment (paymentInt, paymentMet, created_at) VALUES ($1, $2, $3) RETURNING *;`;  
+//     const result = await pool.query(query, [createPayIntent.data.data.id, createPayMethod.data.data.id, created_at]);
+
+//     const initializePaymentResult = {
+//       result: result.rows[0],
+//       createPayIntent: createPayIntent.data,
+//       createPayMethod: createPayMethod.data,
+//       attachPayIntent: attachPayIntent.data,
+//     }
+
+//     return initializePaymentResult;
+    
+//   } catch (error) {
+//     console.log('payment initializing error: ', error);
+//     res.status(400).json({error: error.message || error});
+//   }
+// };
+
+
+// const addPayment = async (createPayIntent, createPayMethod, created_at) => {
+//   try {
+//     // Insert payment information into the database
+//     const queryText = 'INSERT INTO payment (paymentInt, paymentMet, created_at) VALUES ($1, $2, $3)';
+//     const values = [createPayIntent, createPayMethod, created_at];
+//     await pool.query(queryText, values);
+    
+//     res.status(200).json({ success: true, message: 'Payment information recorded successfully' });
+//   } catch (error) {
+//     console.error('Error recording payment:', error);
+//     res.status(500).json({ success: false, error: error.message });
+//   }
+// };
+
 // buyyer callback
 router.get('/confirmPayment', async (req, res) => {
   console.log('confirm Payment');

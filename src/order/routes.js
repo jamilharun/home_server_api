@@ -10,6 +10,10 @@ router.get('/order', controller.getOrders); //data management
 
 router.post('/order/new', controller.createOrder); //buyyer
 
+//custom new order. this include add to cart and initialize payment
+router.post('/order/new/custom', controller.createCustomOrder); //buyyer
+
+
 router.post('/order/cancel', controller.cancelOrder); //buyyers
 
 router.get('/order/details/:id', controller.getOrderDetails); //seller
@@ -45,4 +49,7 @@ router.post('/order/getNewOrder', controller.userNewCheckout) //buyyer
 router.post('/order/user/new/queue', controller.usernewQueue) //buyyer
 
 router.get('/order/user/pickup/:id', controller.getUserPickup)
+
+
+
 module.exports = router;

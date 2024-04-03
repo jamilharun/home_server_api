@@ -5,6 +5,7 @@ const queries = require('./queries');
 const { generateUID } = require('../utils/genUid');
 const { generateToken } = require('../utils/auth');
 const sanity = require('../lib/sanity');
+const axios = require('axios');
 
 
 const getOrders = async (req, res) => {
@@ -26,6 +27,202 @@ const getOrders = async (req, res) => {
         res.status(500).json({ error: 'Internal server error' });
     }
 };
+
+const createCustomOrder = async (req, res) => {
+    console.log('create custom order');
+    const { 
+        userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, 
+        isSpecial, isFinished, created_at, cartItems, _id, amount, name, email, phone, method } = req.body;
+
+    try {
+        const initiallizepayment = await initializePay(_id, amount, name, email, phone, method, created_at)
+        if (!initiallizepayment) {
+            console.log('initiallizepayment error');
+            res.status(400).json({ error: 'initiallizepeyment server error' });
+        }
+        let payinf = initiallizepayment.result;
+        let payint = initiallizepayment.createPayIntent.data.id;
+        let nexact = initiallizepayment.attachPayIntent.data.attributes.next_action.redirect;
+        
+        const isCanceled = false;
+
+        const nwOrder = await addCheckout(payint, userRef, shopRef, groupNum, serviceTax, deliveryFee,
+             totalAmount, location, isSpecial, isCanceled, isFinished, created_at, cartItems);
+        if (!nwOrder) {
+            console.log('add checkout error');
+            res.status(400).json({ error: 'nworder server error' });
+        }
+
+        const response = {
+            result: nwOrder,
+            next_action: nexact
+        }
+        res.status(201).json(response);
+        // const addPaymentdb = await addPayment(payint, initiallizepayment, created_at)
+    } catch (error) {
+        console.log('error: ', error);
+    }
+};
+
+const addCheckout = async (paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, 
+    location, isSpecial, isCanceled, isFinished, created_at, cartItems) => {
+    console.log('add checkout');
+    let returndata = '';
+    try {
+    
+        const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, 
+                        totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
+        const result = await pool.query(queries.createOrder, values);
+        const outPut = result.rows[0]; // Assuming you want to return the first inserted row
+        returndata = outPut;
+        console.log('outPut: ', outPut);
+        if (isSpecial) {
+            redisClient.rpush(`queue:${shopRef}:special`, JSON.stringify(outPut.checkoutid), (err, result) => {
+                if (err) {
+                    console.error('Error pushing to queue:', err);
+                    res.status(500).json({ error: 'Internal server error' });
+                    return;
+                }
+                console.log('add to special queue');
+                console.log('result: ', result);
+            });
+        } else {
+            redisClient.rpush(`queue:${shopRef}`, JSON.stringify(outPut.checkoutid), (err, result) => {
+                if (err) {
+                    console.error('Error pushing to queue:', err);
+                    res.status(500).json({ error: 'Internal server error' });
+                    return;
+                }
+                console.log('add to queue');
+                console.log('result: ', result);
+            });
+        }
+    } catch (error) {
+        console.error('Error creating order:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+    console.log('create cart');
+    try {
+        const cartOutput = [];
+        for (const itemId in cartItems) {
+            if (cartItems.hasOwnProperty(itemId)) {
+                const items = cartItems[itemId];
+                const item = items[0]; // Assuming each key contains an array of items
+    
+                const itemRef = item._id;
+                const quantity = items.length; // Assuming quantity is the length of the array
+                const price = item.price;
+                const subTotalPrice = quantity * price;
+                
+                const values = [groupNum, itemRef, quantity, price, subTotalPrice, created_at];
+    
+                try {
+                    const result = await pool.query(queries.createCart, values);
+                    const outPut = result.rows[0]; // Assuming you want to return the first inserted row
+                    console.log('outPut:', outPut);
+                    // You might want to collect all outputs and send them back after the loop completes
+                    cartOutput.push(outPut)
+                } catch (err) {
+                    console.error('Error creating cart item:', err);
+                    res.status(500).json({ error: err.message });
+                    return; // Exit the function if an error occurs
+                }
+            }
+        }
+        // Send response after all cart items are inserted
+        console.log('reutrnData: ', returndata)
+        console.log('cartOutput: ', cartOutput);
+        return returndata;              
+    } catch (error) {
+        // Handle errors
+        console.error('creating cart somethings wrong:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
+
+};
+
+const initializePay = async (_id, amount, name, email, phone, method, created_at) => {
+    console.log('initialize pay');
+    if (_id === '42662a99-47b5-490d-915b-597b2f8cdbf9') {
+      envdata =  {
+        public: process.env.NODE_ENV_PAYMONGO_PUBLIC_jamil,
+        secret: process.env.NODE_ENV_PAYMONGO_SECRET_jamil
+      };
+      console.log(envdata);
+    } if (_id === '7d66bd84-ca24-454d-8b5b-b317146c339c') {
+      envdata =  {
+        public: process.env.NODE_ENV_PAYMONGO_PUBLIC_shaina,
+        secret: process.env.NODE_ENV_PAYMONGO_SECRET_shaina
+      };
+    } else {
+      console.log('keys not available');
+    }
+    const base64TestSecretKey = Buffer.from(envdata.secret).toString('base64');
+    try {
+      // Creating a payment intent
+      const createPayIntent = await axios.post('https://api.paymongo.com/v1/payment_intents', {
+        data: {
+          attributes: {
+            amount: amount,
+            payment_method_allowed: ['paymaya', 'gcash', 'grab_pay'],
+            payment_method_options: {card: {request_three_d_secure: 'any'}},
+            currency: 'PHP',
+            capture_type: 'automatic',
+            description: 'e-wallet only'
+          }
+        }
+      }, {
+        headers: {
+          'Authorization': `Basic ${base64TestSecretKey}`
+        }
+      });
+  
+      // Creating a payment method
+      const createPayMethod = await axios.post('https://api.paymongo.com/v1/payment_methods', {
+        data: {
+          attributes: {
+            billing: {name: name, email: email, phone: phone},
+            type: method
+          }
+        }
+      }, {
+        headers: {
+          'Authorization': `Basic ${base64TestSecretKey}`
+        }
+      });
+  
+      // Attaching payment method to payment intent
+      const attachPayIntent = await axios.post(`https://api.paymongo.com/v1/payment_intents/${createPayIntent.data.data.id}/attach`, {
+        data: {
+          attributes: {
+            payment_method: createPayMethod.data.data.id,
+            return_url: serverurl
+          }
+        }
+      }, {
+        headers: {
+          'Authorization': `Basic ${base64TestSecretKey}`
+        }
+      });
+  
+      const query = `INSERT INTO payment (paymentInt, paymentMet, created_at) VALUES ($1, $2, $3) RETURNING *;`;  
+      const result = await pool.query(query, [createPayIntent.data.data.id, createPayMethod.data.data.id, created_at]);
+  
+      const initializePaymentResult = {
+        result: result.rows[0],
+        createPayIntent: createPayIntent.data,
+        createPayMethod: createPayMethod.data,
+        attachPayIntent: attachPayIntent.data,
+      }
+  
+      return initializePaymentResult;
+      
+    } catch (error) {
+      console.log('payment initializing error: ', error);
+      res.status(400).json({error: error.message || error});
+    }
+  };
+  
 
 const createOrder = async (req, res) => {
     console.log('create order');
@@ -126,7 +323,7 @@ const createOrder = async (req, res) => {
 //             const itemRef = item._id;
 //             const quantity = items.length;
 //             const price = item.price;
-//             const subTotalPrice = quantity * price;
+//                const subTotalPrice = quantity * price;
             
 //             const values = [groupNum, itemRef, quantity, price, subTotalPrice, created_at];
 
@@ -1210,7 +1407,7 @@ module.exports = {
     getOrders,      //data management
     userNewCheckout, //buyyer
     getAllQueue,    //seller
-    
+    createCustomOrder, //buyyer
     getUserQueue, //buyyer
     getUserQueuev2, //dublicate
     
