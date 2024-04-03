@@ -1399,9 +1399,9 @@ const getUserPickup = async (req, res) => {
             return;
         }
     }
-      
-      console.log('res: ',queue);
-      res.status(200).json(queue);
+        const queueString = JSON.stringify(queue) 
+      console.log('res pickup: ',queueString);
+      res.status(200).json(queueString);
     } catch (error) {
       console.error('Error retrieving queue:', error);
       res.status(500).json({ error: 'Internal server error' });
