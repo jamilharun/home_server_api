@@ -32,15 +32,15 @@ const createCustomOrder = async (req, res) => {
     console.log('create custom order');
     const { 
         userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, 
-        isSpecial, isFinished, created_at, cartItems, _id, amount, name, email, phone, method } = req.body;
+        isSpecial, isFinished, created_at, cartItems, amount, name, email, phone, method } = req.body;
 
     try {
-        const initiallizepayment = await initializePay(_id, amount, name, email, phone, method, created_at)
+        const initiallizepayment = await initializePay(shopRef, amount, name, email, phone, method, created_at)
         if (!initiallizepayment) {
             console.log('initiallizepayment error');
             res.status(400).json({ error: 'initiallizepeyment server error' });
         }
-        let payinf = initiallizepayment.result;
+        // let payinf = initiallizepayment.result;
         let payint = initiallizepayment.createPayIntent.data.id;
         let nexact = initiallizepayment.attachPayIntent.data.attributes.next_action.redirect;
         
