@@ -164,12 +164,12 @@ const initializePay = async (_id, amount, name, email, phone, method, created_at
     const base64TestSecretKey = Buffer.from(envdata.secret).toString('base64');
     // console.log(base64TestSecretKey);
     try {
-        console.log(_id, amount, name, email, phone, method, created_at);
-      // Creating a payment intent
+        const payMongoAmoutFormat = amount * 100;
+    // Creating a payment intent
       const createPayIntent = await axios.post('https://api.paymongo.com/v1/payment_intents', {
         data: {
           attributes: {
-            amount: amount,
+            amount: payMongoAmoutFormat,
             payment_method_allowed: ['paymaya', 'gcash', 'grab_pay'],
             payment_method_options: {card: {request_three_d_secure: 'any'}},
             currency: 'PHP',
