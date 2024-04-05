@@ -48,7 +48,7 @@ CREATE TABLE IF NOT EXISTS "cart" (
 
 CREATE TABLE IF NOT EXISTS "checkout" (
     checkOutId SERIAL PRIMARY KEY,
-    paymentRef INT REFERENCES "payment"(paymentId),
+    paymentRef VARCHAR(256),
     userRef VARCHAR(256) REFERENCES "user"(userid),
     shopRef VARCHAR(256),
     groupNum INT,

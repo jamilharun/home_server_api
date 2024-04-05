@@ -35,23 +35,24 @@ const getOrders = async (req, res) => {
 const createCustomOrder = async (req, res) => {
     console.log('create custom order');
     const { 
-        userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, location, 
-        isSpecial, isFinished, created_at, cartItems, amount, name, email, phone, method } = req.body;
+        paymentRef, userRef, shopRef, groupNum, deliveryFee, totalAmount, location, 
+        isSpecial, created_at, cartItems} = req.body;
 
     try {
-        const initiallizepayment = await initializePay(shopRef, amount, name, email, phone, method, created_at)
-        if (!initiallizepayment) {
-            console.log('initiallizepayment error');
-            res.status(400).json({ error: 'initiallizepeyment server error' });
-        }
-        let payinf = initiallizepayment.result;
-        let payint = initiallizepayment.createPayIntent.data.id;
-        let nexact = initiallizepayment.attachPayIntent.data.attributes.next_action.redirect;
-        
+        // const initiallizepayment = await initializePay(shopRef, amount, name, email, phone, method, created_at)
+        // if (!initiallizepayment) {
+        //     console.log('initiallizepayment error');
+        //     res.status(400).json({ error: 'initiallizepeyment server error' });
+        // }
+        // let payinf = initiallizepayment.result;
+        // let payint = initiallizepayment.createPayIntent.data.id;
+        // let nexact = initiallizepayment.attachPayIntent.data.attributes.next_action.redirect;
+        const serviceTax = 0;
         const isCanceled = false;
+        const isFinished = false;
 
         console.log(payinf);
-        const nwOrder = await addCheckout(payinf.paymentid, userRef, shopRef, groupNum, serviceTax, deliveryFee,
+        const nwOrder = await addCheckout(paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee,
              totalAmount, location, isSpecial, isCanceled, isFinished, created_at, cartItems);
         if (!nwOrder) {
             console.log('add checkout error');
