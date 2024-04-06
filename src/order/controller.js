@@ -51,19 +51,16 @@ const createCustomOrder = async (req, res) => {
         const isCanceled = false;
         const isFinished = false;
 
-        console.log(payinf);
         const nwOrder = await addCheckout(paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee,
              totalAmount, location, isSpecial, isCanceled, isFinished, created_at, cartItems);
         if (!nwOrder) {
             console.log('add checkout error');
             res.status(400).json({ error: 'nworder server error' });
         }
-
-        const response = {
-            result: nwOrder,
-            next_action: nexact
-        }
-        res.status(201).json(response);
+        // const response = {
+        //     result: nwOrder
+        // }
+        res.status(201).json(nwOrder);
         // const addPaymentdb = await addPayment(payint, initiallizepayment, created_at)
     } catch (error) {
         console.log('error: ', error);
