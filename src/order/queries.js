@@ -29,12 +29,17 @@ const isFinished = 'UPDATE "checkout" ' +
                   'WHERE checkOutId = $1 ' +
                   'RETURNING *'  // Replace * with specific columns if needed
 //buyyer
-const getUserOrder=`SELECT c.*, p.* 
-                    FROM checkout c 
-                    JOIN payment p ON c.paymentRef = p.paymentId 
-                    WHERE p.paySuccess = TRUE AND 
-                    c.isCanceled = FALSE AND 
-                    c.userRef = $1;`
+// const getUserOrder=`SELECT c.*, p.* 
+//                     FROM checkout c 
+//                     JOIN payment p ON c.paymentRef = p.paymentId 
+//                     WHERE p.paySuccess = TRUE AND 
+//                     c.isCanceled = FALSE AND 
+//                     c.userRef = $1;
+//byyuer //queue
+const getUserOrder= 'SELECT * FROM "checkout" WHERE ' +
+                    'isCanceled = FALSE AND' +
+                    'isFinished = FALSE AND' +
+                    'userRef = $1;';
 //seller
 const getShopOrder=`SELECT c.*, p.* 
                     FROM checkout c 
@@ -46,6 +51,7 @@ const getShopOrder=`SELECT c.*, p.*
 const finishedOrder = 'SELECT * ' +
                     'FROM "checkout" ' +
                     'WHERE isFinished = TRUE ' +
+                    'AND isCanceled = FALSE ' +
                     'AND userRef = $1';
 
 module.exports = {
