@@ -711,10 +711,8 @@ const getGlobalQueue = async (checkout) => {
 
 
   const gettingQueue  = async (queueAll, unfinishedCheckouts) => {
-    
     const queue = [];        
     // const globalQueue = []
-    
     for (const value of queueAll){
         const checkoutData = unfinishedCheckouts.rows.find(data => data.checkoutid === value);
         // console.log(checkoutData);
@@ -754,20 +752,11 @@ const getGlobalQueue = async (checkout) => {
         if (matchingIndex !== -1) {
             queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
             console.log(matchingIndex, checkoutData.checkoutid );
-            // console.log('nag push na');
-
         }
         console.log('globalqueue', globalQueue);
-        return queue;
     }
-    // for (let index = 0; index < 1; index++) {
-    //     console.log('yay this work');
-    // }
-    // console.log('classic', queueClassic);
-    // console.log('special', queueSpecial);
-    // console.log('all', queueAll);
-    // console.log('res: ',queue);
-    // // res.status(200).json(queue);
+    return queue;
+    
 }
 
 const checkPaySuccess = async (req, res) => {
