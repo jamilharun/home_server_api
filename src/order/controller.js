@@ -963,9 +963,10 @@ const userCheckout = async (req, res) => {
 
 //shop
 const shopCheckout = async (req, res) => {
-    console.log('shop queue');
+    console.log('all shop checkout');
     const  shopid  = req.params.id;
     try {
+        console.log('shopid: ', shopid);
         // Fetch unfinished checkouts for the given userId
         const unfinishedCheckouts = await pool.query(queries.getShopOrder, [shopid]);
         
