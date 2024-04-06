@@ -900,7 +900,7 @@ const userCheckout = async (req, res) => {
 
     try {
         // Fetch unfinished checkouts for the given userId
-        const unfinishedCheckouts = await pool.query(queries.getUserOrder, [userId]);
+        const unfinishedCheckouts = await pool.query(queries.getallUserOrder, [userId]);
         
         // Group data by checkoutId
         const dataByCheckoutId = {};
@@ -1368,13 +1368,9 @@ const getUserPickup = async (req, res) => {
         const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
         
         // console.log(checkoutData);
-
         const queueKey = `pickup:${checkoutData.shopref}`;
-
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
-
         let matchingIndex = -1;
-
         for (const [index, item] of queueItems.entries()) {
             if (item === JSON.stringify(value)) {
                 matchingIndex = index;
