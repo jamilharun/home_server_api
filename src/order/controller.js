@@ -60,6 +60,7 @@ const createCustomOrder = async (req, res) => {
         // const response = {
         //     result: nwOrder
         // }
+        console.log('nwOrder: ', nwOrder);
         res.status(201).json(nwOrder);
         // const addPaymentdb = await addPayment(payint, initiallizepayment, created_at)
     } catch (error) {
@@ -105,15 +106,15 @@ const addCheckout = async (paymentRef, userRef, shopRef, groupNum, serviceTax, d
         res.status(500).json({ error: 'Internal server error' });
     }
     console.log('create cart');
-    console.log('cart items: ', cartItems);
+    // console.log('cart items: ', cartItems);
     try {
         const cartOutput = [];
         for (const itemId in cartItems) {
             if (cartItems.hasOwnProperty(itemId)) {
                 const items = cartItems[itemId];
                 const item = items[0]; // Assuming each key contains an array of items
-                console.log('items: ',items);
-                console.log('item: ',item);
+                // console.log('items: ',items);
+                // console.log('item: ',item);
                 const itemRef = item._id;
                 const quantity = items.length; // Assuming quantity is the length of the array
                 const price = item.price;
@@ -1169,7 +1170,6 @@ const userCheckoutAndQueue = async (req, res) => {
 const userNewCheckout = async (req, res) => {
     console.log('user queue');
     const  {checkoutid, userref, shopref, groupnum}  = req.body;
-    
     try {
         const dataByCheckoutId = {};
         
