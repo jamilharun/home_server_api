@@ -105,6 +105,7 @@ const addCheckout = async (paymentRef, userRef, shopRef, groupNum, serviceTax, d
         res.status(500).json({ error: 'Internal server error' });
     }
     console.log('create cart');
+    console.log('cart items: ', cartItems);
     try {
         const cartOutput = [];
         for (const itemId in cartItems) {
