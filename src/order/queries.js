@@ -37,8 +37,8 @@ const isFinished = 'UPDATE "checkout" ' +
 //                     c.userRef = $1;
 //byyuer //queue
 const getUserOrder= 'SELECT * FROM "checkout" WHERE ' +
-                    'isCanceled = FALSE AND' +
-                    'isFinished = FALSE AND' +
+                    'isCanceled = FALSE AND ' +
+                    'isFinished = FALSE AND ' +
                     'userRef = $1;';
 //seller
 const getShopOrder=`SELECT c.*, p.* 
