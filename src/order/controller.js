@@ -957,7 +957,7 @@ const shopCheckout = async (req, res) => {
     try {
         console.log('shopid: ', shopid);
         // Fetch unfinished checkouts for the given userId
-        const unfinishedCheckouts = await pool.query(queries.getShopOrder, [shopid]);
+        const unfinishedCheckouts = await pool.query(queries.getShopOrderv2, [shopid]);
         
         // Group data by checkoutId
         const dataByCheckoutId = {};

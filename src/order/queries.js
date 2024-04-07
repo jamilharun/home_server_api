@@ -28,7 +28,12 @@ const isFinished = 'UPDATE "checkout" ' +
                   'SET isFinished = true ' +
                   'WHERE checkOutId = $1 ' +
                   'RETURNING *'  // Replace * with specific columns if needed
-//buyyer
+const isFinishedv2 = 'UPDATE "checkout" ' +
+                  'SET isCanceled = true ' +
+                  'WHERE checkOutId = $1 ' +
+                  'RETURNING *'  // Replace * with specific columns if needed
+
+                  //buyyer
 // const getUserOrder=`SELECT c.*, p.* 
 //                     FROM checkout c 
 //                     JOIN payment p ON c.paymentRef = p.paymentId 
@@ -57,6 +62,11 @@ const getShopOrder=`SELECT * FROM "checkout" WHERE
                     isCanceled = FALSE AND  
                     shopRef = $1; `
 
+const getShopOrderv2=`SELECT * FROM "checkout" WHERE 
+                    isCanceled = FALSE AND
+                    isFinished = FALSE AND
+                    shopRef = $1; `
+
 // buyyer
 const finishedOrder = 'SELECT * ' +
                     'FROM "checkout" ' +
@@ -71,9 +81,11 @@ module.exports = {
     orderDetail, //seller
     cartItems, //seller
     getShopOrder, //seller
+    getShopOrderv2,
     // getCheckoutId, //buyyer //queue
     getallUserOrder,
     finishedOrder,
+    isFinishedv2, //buyyer
     //CREATE
     createOrder, //buyyer
     createCart, //buyyer
