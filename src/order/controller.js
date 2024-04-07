@@ -1562,6 +1562,7 @@ const getUserPickupv3 = async (req, res) => {
         console.log('fin data:',finishedCheckouts);
       const queue = [];
       const checkoutDataMap = {}; // Store checkout data for lookup
+    let queuePickup = []; // Store checkout ids for pickup
 
       for (const checkout of finishedCheckouts.rows) {
         queuePickup.push(checkout.checkoutid);    
@@ -1572,7 +1573,7 @@ const getUserPickupv3 = async (req, res) => {
       for (const value of queuePickup){
         const checkoutData = checkoutDataMap[value]; // Use pre-fetched data
         
-        console.log(checkoutData);
+        console.log('checkoutid: ', checkoutData);
 
         const queueKey = `pickup:${checkoutData.shopref}`;
 
