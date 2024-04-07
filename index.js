@@ -6,9 +6,12 @@ const userRoutes = require('./src/user/routes');
 const orderRoutes = require('./src/order/routes');
 const pay = require('./src/lib/paymongo');
 
+const cors = require('cors');
+
 const app = express();
 const port = 3000;
- 
+
+app.use(cors()); 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 app.use(bodyParser.json());
