@@ -1350,100 +1350,58 @@ const usernewQueue = async (req, res) => {
 }
 
 
-// const getUserPickup = async (req, res) => {
-//     console.log('get user pickup');
-//     const userId = req.params.id; // Corrected variable name
-//     console.log(userId);
-//     try {
-//       const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
-//         // console.log('fin data:',finishedCheckouts);
-//       const queue = [];
-//       const queuePickup = [];
-
-//       for (const checkout of finishedCheckouts.rows) {
-//         queuePickup.push(checkout.checkoutid);    
-//       }
-//       console.log('queuePickup', queuePickup);
-//       for (const value of queuePickup){
-//         const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
-        
-//         console.log(checkoutData);
-//         const queueKey = `pickup:${checkoutData.shopref}`;
-//         const queueItems = await redisClient.lrange(queueKey, 0, -1);
-//         let matchingIndex = -1;
-//         for (const [index, item] of queueItems.entries()) {
-//             if (item === JSON.stringify(value)) {
-//                 matchingIndex = index;
-//                 break;
-//             }
-//         }
-
-//         if (matchingIndex !== -1) {
-//             queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
-//         } else {
-//             res.status(404).json({ error: 'Checkout ID not found in the pickup' });         
-//             return;
-//         }
-//     }
-//         // const queueString = JSON.stringify(queue) 
-//       console.log('res pickup: ',queue);
-//       res.status(200).json(queue);
-//     } catch (error) {
-//       console.error('Error retrieving queue:', error);
-//       res.status(500).json({ error: 'Internal server error' });
-//     }
-//   };
-
 const getUserPickup = async (req, res) => {
-    console.log('Getting user pickup information');
-    const userId = req.params.id;
-    console.log('User ID:', userId);
+    console.log('get user pickup');
+    const userId = req.params.id; // Corrected variable name
+    console.log(userId);
     try {
-        const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
-        const queue = [];
+      const finishedCheckouts = await pool.query(queries.finishedOrder, [userId]);
+        // console.log('fin data:',finishedCheckouts);
+      const queuePickup = [];
 
-        for (const checkout of finishedCheckouts.rows) {
-            const checkoutId = checkout.checkoutid;
-            console.log('Processing checkout:', checkoutId);
-            const queuePickup = await getQueuePickup(checkoutId);
-            
-            if (queuePickup !== null) {
-                queue.push(queuePickup);
-            } else {
-                res.status(404).json({ error: 'Checkout ID not found in the pickup' });
-                return;
+      for (const checkout of finishedCheckouts.rows) {
+        queuePickup.push(checkout.checkoutid);    
+      }
+      console.log('queuePickup', queuePickup);
+      
+      const queue = await matchingIndex(queuePickup, finishedCheckouts);
+
+      console.log('pickup: ',queue);
+      res.status(200).json(queue);
+    } catch (error) {
+      console.error('Error retrieving queue:', error);
+      res.status(500).json({ error: 'Internal server error' });
+    }
+};
+
+const matchingIndex = async (queuePickup, finishedCheckouts) => {
+    console.log('matching index');
+    
+    let queue = [];
+    
+    for (const value of queuePickup){
+        const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
+        
+        console.log(checkoutData);
+        const queueKey = `pickup:${checkoutData.shopref}`;
+        const queueItems = await redisClient.lrange(queueKey, 0, -1);
+        let matchingIndex = -1;
+        for (const [index, item] of queueItems.entries()) {
+            if (item === JSON.stringify(value)) {
+                matchingIndex = index;
+                break;
             }
         }
 
-        console.log('User pickup:', queue);
-        res.status(200).json(queue);
-    } catch (error) {
-        console.error('Error retrieving user pickup:', error);
-        res.status(500).json({ error: 'Internal server error' });
+        if (matchingIndex !== -1) {
+            queue.push({ index: matchingIndex, data: checkoutData.checkoutid }); // Include both index and data
+        } else {
+            // res.status(404).json({ error: 'Checkout ID not found in the pickup' });         
+            console.log('matching index did not match');
+        }
     }
+    return queue;
 };
-
-const getQueuePickup = async (checkoutId) => {
-    console.log('Getting queue pickup for checkout:', checkoutId);
-    const checkoutData = await findCheckoutData(checkoutId);
-    const queueKey = `pickup:${checkoutData.shopref}`;
-    const queueItems = await redisClient.lrange(queueKey, 0, -1);
-
-    const matchingIndex = queueItems.findIndex(item => JSON.parse(item) === checkoutId);
-    if (matchingIndex !== -1) {
-        return { index: matchingIndex, data: checkoutId };
-    } else {
-        return null;
-    }
-};
-
-const findCheckoutData = async (checkoutId) => {
-    console.log('Finding checkout data for checkout:', checkoutId);
-    const finishedCheckouts = await pool.query(queries.finishedOrder, [checkoutId]);
-    return finishedCheckouts.rows.find(data => data.checkoutid === checkoutId);
-};
-
-
 
 
   const getUserPickupv2 = async (req, res) => {
