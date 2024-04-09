@@ -152,7 +152,8 @@ return query;
 const qfsdf = `*[_type == "shop" &&!(_id in path("drafts.**"))]{
     _type,
     _id,
-    
+    accNum,
+    qrcode,
     isPromoted,
     description,
     isActive,
