@@ -18,7 +18,7 @@ router.post('/order/cancel', controller.cancelOrder); //buyyers
 
 router.get('/order/details/:id', controller.getOrderDetails); //seller
 
-router.get('/order/readypickup/:id', controller.setpickup); //seller //finished //for pickingup finished items
+router.post('/order/readypickup', controller.setpickup); //seller //finished //for pickingup finished items
 //sub routes
 router.get('/order/removePickup/:id', controller.removePickup); //buyyer //finished //when buyyer already pickup the item
 

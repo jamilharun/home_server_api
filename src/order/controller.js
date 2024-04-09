@@ -423,16 +423,17 @@ const getOrderDetails = async (req, res) => {
 
 const setpickup = async (req, res) => {
     console.log('ready to pickup');
-    const checkoutid = req.params.id; // Corrected variable name
+    const { data, index } = req.body;
+    // const checkoutid = req.params.id; // Corrected variable name
     try {
         // Update the status of the order to indicate it is ready for pickup
-        const values = [ checkoutid ];
+        const values = [ data ];
         const updatedDataRow = await pool.query(queries.isFinished, values);
         const updatedData = updatedDataRow.rows[0];
 
         console.log(updatedData);
         if (updatedData.isSpecial) {
-            redisClient.rpop(`queue:${updatedData.shopref}:special`, checkoutid, (err, result) => {
+            redisClient.lpop(`queue:${updatedData.shopref}:special`, index, (err, result) => {
                 if (err) {
                     console.error('Error pushing to queue:', err);
                     res.status(500).json({ error: 'Internal server error' });
@@ -441,7 +442,7 @@ const setpickup = async (req, res) => {
                 console.log('result: ', result);
             });
         } else {
-            redisClient.rpop(`queue:${updatedData.shopref}`, checkoutid, (err, result) => {
+            redisClient.lpop(`queue:${updatedData.shopref}`, index, (err, result) => {
                 if (err) {
                     console.error('Error pushing to queue:', err);
                     res.status(500).json({ error: 'Internal server error' });
