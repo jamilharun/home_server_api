@@ -37,7 +37,8 @@ const createCustomOrder = async (req, res) => {
     const { 
         paymentRef, userRef, shopRef, groupNum, deliveryFee, totalAmount, location, 
         isSpecial, created_at, cartItems} = req.body;
-
+    console.log('req data', paymentRef, userRef, shopRef, groupNum, deliveryFee, totalAmount, location, 
+    isSpecial, created_at);
     try {
         // const initiallizepayment = await initializePay(shopRef, amount, name, email, phone, method, created_at)
         // if (!initiallizepayment) {
@@ -71,11 +72,12 @@ const createCustomOrder = async (req, res) => {
 const addCheckout = async (paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, totalAmount, 
     location, isSpecial, isCanceled, isFinished, created_at, cartItems) => {
     console.log('add checkout');
+    let totalAmountwithdeliveryfee = totalAmount + deliveryFee;
     let returndata = '';
     try {
     
         const values = [paymentRef, userRef, shopRef, groupNum, serviceTax, deliveryFee, 
-                        totalAmount, location, isSpecial, isCanceled, isFinished, created_at];
+            totalAmountwithdeliveryfee, location, isSpecial, isCanceled, isFinished, created_at];
         const result = await pool.query(queries.createOrder, values);
         const outPut = result.rows[0]; // Assuming you want to return the first inserted row
         returndata = outPut;
