@@ -433,22 +433,22 @@ const setpickup = async (req, res) => {
 
         console.log(updatedData);
         if (updatedData.isSpecial) {
-            redisClient.lpop(`queue:${updatedData.shopref}:special`, index, (err, result) => {
+            redisClient.lrem(`queue:${updatedData.shopref}:special`,0 , data, (err, result) => {
                 if (err) {
                     console.error('Error pushing to queue:', err);
                     res.status(500).json({ error: 'Internal server error' });
                     return;
                 }
-                console.log('result: ', result);
+                console.log('result: ', result, 'remove to queue successful');
             });
         } else {
-            redisClient.lpop(`queue:${updatedData.shopref}`, index, (err, result) => {
+            redisClient.lrem(`queue:${updatedData.shopref}`,0 , data, (err, result) => {
                 if (err) {
                     console.error('Error pushing to queue:', err);
                     res.status(500).json({ error: 'Internal server error' });
                     return;
                 }
-                console.log('result: ', result);
+                console.log('result: ', result, 'remove to queue successful');
             });
         };
         await redisClient.rpush(`pickup:${updatedData.shopref}`, data, (err, result) => {
@@ -471,7 +471,7 @@ const removePickup = async (req, res) => {
     const checkoutid = req.params.id;
     try {
         const values = [ checkoutid ];
-        const updatedDataRow = await pool.query(queries.isFinished, values);
+        const updatedDataRow = await pool.query(queries.isFinishedv2, values);
         const updatedData = updatedDataRow.rows[0];
 
         // Remove the checkout ID from the pickup queue in Redis
