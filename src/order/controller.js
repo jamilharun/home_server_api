@@ -451,7 +451,7 @@ const setpickup = async (req, res) => {
                 console.log('result: ', result);
             });
         };
-        await redisClient.rpush(`pickup:${updatedData.shopref}`, checkoutid, (err, result) => {
+        await redisClient.rpush(`pickup:${updatedData.shopref}`, data, (err, result) => {
             if (err) {
                 console.error('Error adding to pickup queue:', err);
                 res.status(500).json({ error: 'Internal server error' });
