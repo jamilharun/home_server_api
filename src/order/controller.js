@@ -238,7 +238,7 @@ const createOrder = async (req, res) => {
             location, isSpecial, isFinished, created_at } = req.body;
     const isCanceled = false; //default value upon create order
 
-    console.log(req.body);
+    // console.log(req.body);
 
     let returndata = '';
 
@@ -248,7 +248,7 @@ const createOrder = async (req, res) => {
         const result = await pool.query(queries.createOrder, values);
         const outPut = result.rows[0]; // Assuming you want to return the first inserted row
         returndata = outPut;
-        console.log('outPut: ', outPut);
+        // console.log('outPut: ', outPut);
         if (isSpecial) {
             redisClient.rpush(`queue:${shopRef}:special`, JSON.stringify(outPut.checkoutid), (err, result) => {
                 if (err) {
@@ -431,7 +431,7 @@ const setpickup = async (req, res) => {
         const updatedDataRow = await pool.query(queries.isFinished, values);
         const updatedData = updatedDataRow.rows[0];
 
-        console.log(updatedData);
+        // console.log(updatedData);
         if (updatedData.isSpecial) {
             redisClient.lrem(`queue:${updatedData.shopref}:special`,0 , data, (err, result) => {
                 if (err) {
@@ -701,7 +701,7 @@ const getGlobalQueue = async (checkout) => {
         for (const value of queueClassic) {queueAll.push(value)}
   
         const queue = await gettingQueue(queueAll, unfinishedCheckouts);
-        console.log('QueueAll:', queueAll);
+        // console.log('QueueAll:', queueAll);
         console.log('Queue:', queue);
         res.status(200).json(queue);
     } catch (error) {
@@ -910,12 +910,12 @@ const userCheckout = async (req, res) => {
         for (const checkout of unfinishedCheckouts.rows) {
             const { checkoutid, groupnum, shopref, userref } = checkout;
             
-            console.log(checkout)
+            // console.log(checkout)
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
             const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
             
-            console.log(cart);
+            // console.log(cart);
             const cartstring = JSON.stringify(cart)
             // Fetch items for each cart
             // console.log(itemrefs);
@@ -966,10 +966,10 @@ const shopCheckout = async (req, res) => {
         // Process each checkout
         for (const checkout of unfinishedCheckouts.rows) {
             const { checkoutid, groupnum, shopref, userref } = checkout;
-            console.log(checkout);
+            // console.log(checkout);
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
-            console.log(cart);
+            // console.log(cart);
             
             const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
             // Fetch items for each cart
@@ -1168,7 +1168,7 @@ const userNewCheckout = async (req, res) => {
         const cart = await fetchCartByGroupNum(groupnum);
         const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
         
-        console.log(cart);
+        // console.log(cart);
         const cartstring = JSON.stringify(cart)
         // Fetch items for each cart
         // console.log(itemrefs);
@@ -1191,7 +1191,7 @@ const userNewCheckout = async (req, res) => {
             buyerDetails,
             shopOwnerDetails
         };
-        console.log(checkoutData);
+        // console.log(checkoutData);
         // Group the data by checkoutId
         dataByCheckoutId[checkoutid] = checkoutData;
     
@@ -1341,7 +1341,7 @@ const usernewQueue = async (req, res) => {
             return;
         }
 
-        console.log('globalQueue: ', globalQueue);
+        // console.log('globalQueue: ', globalQueue);
         console.log('res: ',queue);
         res.status(200).json(queue);
     } catch (error) {
@@ -1363,7 +1363,7 @@ const getUserPickup = async (req, res) => {
       for (const checkout of finishedCheckouts.rows) {
         queuePickup.push(checkout.checkoutid);    
       }
-      console.log('queuePickup', queuePickup);
+    //   console.log('queuePickup', queuePickup);
       
       const queue = await matchingIndex(queuePickup, finishedCheckouts);
 
@@ -1383,7 +1383,7 @@ const matchingIndex = async (queuePickup, finishedCheckouts) => {
     for (const value of queuePickup){
         const checkoutData = finishedCheckouts.rows.find(data => data.checkoutid === value);
         
-        console.log(checkoutData);
+        // console.log(checkoutData);
         const queueKey = `pickup:${checkoutData.shopref}`;
         const queueItems = await redisClient.lrange(queueKey, 0, -1);
         let matchingIndex = -1;
@@ -1523,12 +1523,12 @@ const matchingIndex = async (queuePickup, finishedCheckouts) => {
         for (const checkout of unfinishedCheckouts.rows) {
             const { checkoutid, groupnum, shopref, userref } = checkout;
             
-            console.log(checkout)
+            // console.log(checkout)
             // Fetch cart based on groupNum
             const cart = await fetchCartByGroupNum(groupnum);
             const itemrefs = await Promise.all(cart.map(cartd => cartd.itemref))
             
-            console.log(cart);
+            // console.log(cart);
             const cartstring = JSON.stringify(cart)
             // Fetch items for each cart
             // console.log(itemrefs);
@@ -1551,7 +1551,7 @@ const matchingIndex = async (queuePickup, finishedCheckouts) => {
                 buyerDetails,
                 shopOwnerDetails
             };
-            console.log(checkoutData);
+            // console.log(checkoutData);
             // Group the data by checkoutId
             dataByCheckoutId[checkoutid] = checkoutData;
         }
@@ -1579,12 +1579,12 @@ const getUserPickupv3 = async (req, res) => {
         queuePickup.push(checkout.checkoutid);    
         checkoutDataMap[checkout.checkoutid] = checkout; // Map checkout id to data
       }
-      console.log('queuePickup', queuePickup);
+    //   console.log('queuePickup', queuePickup);
 
       for (const value of queuePickup){
         const checkoutData = checkoutDataMap[value]; // Use pre-fetched data
         
-        console.log('checkoutid: ', checkoutData);
+        // console.log('checkoutid: ', checkoutData);
 
         const queueKey = `pickup:${checkoutData.shopref}`;
 
