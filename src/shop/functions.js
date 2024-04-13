@@ -16,7 +16,17 @@ const getGets = async (keys) => {
             const get = await redisClient.get(key);
             return get;
         }));
-        return gets;
+        if (gets) {
+          const json = await Promise.all(gets.map(async (value) => {
+            return JSON.parse(value);
+          }));
+          console.log('keys retrieved from Redis:', json.length);
+          return json;
+        } else {
+          console.log('No data retrieved from Redis' );;
+          return null;
+        }
+        // return gets;
     } catch (error) {
         console.log('error in getGets:', error);
         throw error;
