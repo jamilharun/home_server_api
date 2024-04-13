@@ -11,22 +11,14 @@ const getKeys = async (key) => {
     }
 }
 const getGets = async (keys) => {
-    try {
-        const gets = Promise.all(keys.map(async (key) => {
-            const get = await redisClient.get(key);
-            return get;
+  console.log('get gets');  
+  try {
+        const values = Promise.all(keys.map(async (key) => {
+          const ketStr = await redisClient.get(key);
+          return JSON.parse(ketStr);
         }));
-        if (gets) {
-          const json = await Promise.all(gets.map(async (value) => {
-            return JSON.parse(value);
-          }));
-          console.log('keys retrieved from Redis:', json.length);
-          return json;
-        } else {
-          console.log('No data retrieved from Redis' );;
-          return null;
-        }
-        // return gets;
+
+        return values;
     } catch (error) {
         console.log('error in getGets:', error);
         throw error;
