@@ -12,9 +12,13 @@ const createCart =  'INSERT INTO "cart" '+
                     'VALUES ' +
                     '($1, $2, $3, $4, $5, $6) RETURNING *';
 //buyyer
+// const cancelOrder = 'UPDATE "checkout" ' +
+//                     'SET isCanceled = $1 ' +
+//                     'WHERE userRef = $2 AND shopRef = $3 AND groupNum = $4';
 const cancelOrder = 'UPDATE "checkout" ' +
                     'SET isCanceled = $1 ' +
-                    'WHERE userRef = $2 AND shopRef = $3 AND groupNum = $4';
+                    'WHERE userRef = $2 AND shopRef = $3 AND groupNum = $4 ' +
+                    'RETURNING *'; // '*' indicates returning all columns, you can specify specific columns if needed
 //seller
 const orderDetail = 'SELECT * ' +
                     'FROM "checkout" ' +
