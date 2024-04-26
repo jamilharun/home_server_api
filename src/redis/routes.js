@@ -225,4 +225,40 @@ router.delete('/shop/deleteData', async (req, res) => {
   }
 });
 
+//===============================
+router.get('/all/shop/queue', async (req, res) => {
+  console.log('allshopqueue');;
+  const keypattern = 'shop:*';
+  try {
+    //fetching sorted sets from redis
+    //if successful, retur  n data
+    const ask = await cache.getKeysWithPattern(keypattern)
+
+    if (!ask) {
+      //fetching scored is empty, probably its empty
+      // gonna fetch data
+      
+      const datas = await cache.sanityFetch(groq.qfsdf)
+      if (datas) {
+        //fetching data successful
+        await cache.addCache(datas);
+        const listShopQueue = await cache.getAllQueue(datas);
+        res.json(listShopQueue);
+      } else {
+        //fetching data failed
+        res.status(500).json({ error: 'cant fetch data from sanity' });
+      }
+      
+    } else {
+      //fetching score successful
+      const listShopQueuev2 = await cache.getAllQueuev2(ask);
+      res.json(listShopQueuev2);
+    }
+  } catch (error) {
+    res.status(500).json({ error: 'fetch shops Internal server error' });
+  }
+});
+
+
+
 module.exports = router;

@@ -281,6 +281,77 @@ async function imagePickertoSanityAssets(formData) {
   }
 }
 
+//===================
+const getAllQueue = async (datas) => {
+  console.log('get all shop queue');
+  const shopQueues = []; // Initialize array to store all queues
+  try {
+    for (const data of datas) {
+      const allQueue = [];
+      
+      const queueSpecial = await redisClient.lrange(`queue:${data._id}:special`, 0, -1);
+      const queueClassic = await redisClient.lrange(`queue:${data._id}`, 0, -1);
+      const readyPickup = await redisClient.lrange(`pickup:${data._id}`, 0, -1)
+      for (const value of queueSpecial) {
+        allQueue.push(value);
+      }
+      for (const value of queueClassic) {
+        allQueue.push(value);
+      }
+      console.log(allQueue);
+      
+      shopQueues.push({
+        shopid: data._id,
+        allQueue: allQueue,
+        queuePriority: queueSpecial,
+        queueClassic: queueClassic,
+        pickup: readyPickup,
+      });
+    }
+    return shopQueues; // Return combined queues for all shops
+  } catch (error) {
+    console.error('Error retrieving queue:', error);
+    return null;
+  }
+};
+
+
+
+const getAllQueuev2 = async (datas) => {
+  console.log('get all shop queue');
+  const shopQueues = []; // Initialize array to store all queues
+  try {
+    for (const data of datas) {
+      let strrep = data.replace(/^shop:/, ''); 
+      const allQueue = [];
+      
+      const queueSpecial = await redisClient.lrange(`queue:${strrep}:special`, 0, -1);
+      const queueClassic = await redisClient.lrange(`queue:${strrep}`, 0, -1);
+      const readyPickup = await redisClient.lrange(`pickup:${strrep}`, 0, -1)
+      for (const value of queueSpecial) {
+        allQueue.push(value);
+      }
+      for (const value of queueClassic) {
+        allQueue.push(value);
+      }
+      console.log(allQueue);
+      
+      shopQueues.push({
+        shopid: strrep,
+        allQueue: allQueue,
+        queuePriority: queueSpecial,
+        queueClassic: queueClassic,
+        pickup: readyPickup,
+      });
+    }
+    return shopQueues; // Return combined queues for all shops
+  } catch (error) {
+    console.error('Error retrieving queue:', error);
+    return null;
+  }
+};
+
+
 module.exports = {
   //fetch data
 
@@ -290,6 +361,9 @@ module.exports = {
   getDataByKey,
     
   cacheGetShopByOwner,
+
+  getAllQueue,
+  getAllQueuev2,
   //add data
   addNewData,
   addCache,
